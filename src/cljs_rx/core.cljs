@@ -1,6 +1,7 @@
 (ns cljs-rx.core
   (:refer-clojure :exclude [map filter empty range concat count delay distinct
-                            first last every? empty? group-by max min merge find])
+                            first last every? empty? group-by max min merge
+                            reduce])
   (:require [cljs.core :as core]
             [cljsjs.rxjs :as rxjs]
             [cljs-rx.internal.interrop :refer [ari-1 ari-0 ari-2 cljs-observer js-observer js-iterator]]))
@@ -332,9 +333,54 @@
   ([obs subject-or-subject-factory]
    (multicast obs subject-or-subject-factory js/undefined)))
 
-(defn subscribe [obs {:keys [next error complete]
-                      :or   {next     (constantly nil)
-                             error    (constantly nil)
-                             complete (constantly nil)}}]
-  (.subscribe obs (ari-1 next) (ari-1 error) (ari-1 complete)))
+(defn observe-on [obs scheduler delay]
+  (.observeOn obs scheduler delay))
+
+(defn pairwise [obs]
+  (.pairwise obs))
+
+(defn partition [obs predicate]
+  (.partition obs (ari-1 predicate)))
+
+(defn pluck [obs & props]
+  (((apply (.-pluck rxjs/operators) props) obs)))
+
+(defn publish [obs]
+  (.publish obs))
+
+(defn publish-behaviour [obs value]
+  (.publishBehavior obs value))
+
+(defn publish-last [obs]
+  (.publishLast obs))
+
+(defn publish-replay
+  ([obs buffer-size window-size scheduler]
+   (.publishReplay obs buffer-size window-size scheduler))
+  ([obs buffer-size window-size]
+   (publish-replay obs buffer-size window-size js/undefined))
+  ([obs buffer-size]
+   (publish-replay obs buffer-size js/undefined))
+  ([obs]
+   (publish-replay obs js/undefined)))
+
+(defn race [& observables]
+  (if (core/empty? observables)
+    (empty)
+    (((apply (.-race rxjs/operators) (core/rest observables)) (core/first observables)))))
+
+(defn reduce
+  ([obs accumulator seed]
+   (.reduce obs (ari-2 accumulator) seed))
+  ([obs accumulator]
+   (reduce obs accumulator js/undefined)))
+
+(defn repeat [obs count]
+  (.repeat obs count))
+
+(defn repeat-when [obs notifier]
+  (.repeatWhen obs (ari-1 notifier)))
+
+(defn subscribe [obs observer]
+  (.subscribe obs (js-observer observer)))
 
