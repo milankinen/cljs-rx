@@ -526,6 +526,9 @@
   ([obs]
    (.toPromise obs)))
 
+(defn unsubscribe! [subscription]
+  (.unsubscribe subscription))
+
 (defn window [obs window-boundaries]
   (.window obs window-boundaries))
 
