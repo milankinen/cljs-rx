@@ -22,9 +22,9 @@
   (true? (:all-args (meta f))))
 
 (defn cljs-observer [js-observer]
-  {:next     (fn next [x] ((.-next js-observer) x))
-   :error    (fn error [e] ((.-error js-observer) e))
-   :complete (fn complete [] ((.-complete js-observer)))})
+  {:next     (fn next [x] (.next js-observer x))
+   :error    (fn error [e] (.error js-observer e))
+   :complete (fn complete [] (.complete js-observer))})
 
 (defn js-observer [{:keys [next error complete]}]
   (->> {:next next :error error :complete complete}
