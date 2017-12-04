@@ -13,11 +13,30 @@
 
 (def ^:private operators rxjs/operators)
 
+(defn- -create [on-subscribe]
+  (letfn [(wrapped-subs [observer]
+            (on-subscribe (cljs-observer observer)))]
+    ((.-create Observable) wrapped-subs)))
+
+(defn- coll->ish [coll]
+  (js-iterator (seq coll)))
+
+(defn- watchable->ish [watchable]
+  (-> (fn [{:keys [next]}]
+        (letfn [(on-val [_ _ old new]
+                  (when (not= old new)
+                    (next new)))]
+          (next @watchable)
+          (add-watch watchable next on-val)
+          (fn unwatch []
+            (remove-watch watchable next))))
+      (-create)))
+
 (defn- ->ish [ish]
-  (if (or (sequential? ish)
-          (set? ish))
-    (js-iterator (seq ish))
-    ish))
+  (cond
+    (coll? ish) (coll->ish ish)
+    (satisfies? IWatchable ish) (watchable->ish ish)
+    :else ish))
 
 (defn- apply-with-project [op obs others]
   (let [project (core/last others)
@@ -26,12 +45,10 @@
                   others)]
     ((apply op args) obs)))
 
-; === sources ===
+; === factories ===
 
 (defn create [on-subscribe]
-  (letfn [(wrapped-subs [observer]
-            (on-subscribe (cljs-observer observer)))]
-    ((.-create Observable) wrapped-subs)))
+  (-create on-subscribe))
 
 (defn of [& xs]
   (apply (.-of Observable) xs))
@@ -555,4 +572,3 @@
    (.zipAll obs (fn-n project)))
   ([obs]
    (.zipAll obs)))
-
