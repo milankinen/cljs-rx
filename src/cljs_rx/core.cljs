@@ -121,6 +121,9 @@
   ([initial-delay]
    ((.-timer Observable) initial-delay)))
 
+(defn using [resource-factory observable-factory]
+  ((.-using Observable) (fn-0 resource-factory) (fn-1 observable-factory)))
+
 ; === operators ===
 
 (defn audit [obs duration-selector]
