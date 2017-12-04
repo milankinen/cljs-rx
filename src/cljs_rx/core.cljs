@@ -1,15 +1,26 @@
 (ns cljs-rx.core
   (:refer-clojure :exclude [map filter empty range concat count delay distinct first last every?
-                            empty? group-by max min merge reduce])
+                            empty? group-by max min merge reduce find partition repeat take take-last
+                            take-while to-array])
   (:require [cljs.core :as core]
             [cljsjs.rxjs :as rxjs]
-            [cljs-rx.internal.interrop :refer [fn-1 fn-2 fn-3 cljs-observer js-observer js-iterator]]))
+            [cljs-rx.internal.interrop :refer [fn-0 fn-1 fn-2 fn-2 fn-n
+                                               cljs-observer
+                                               js-observer
+                                               js-iterator]]))
 
-(defn ->ish [ish]
+(defn- ->ish [ish]
   (if (or (sequential? ish)
           (set? ish))
     (js-iterator (seq ish))
     ish))
+
+(defn- apply-with-project [op obs others]
+  (let [project (core/last others)
+        args    (if (fn? project)
+                  (conj (vec (core/drop-last 1 others)) (fn-n project))
+                  others)]
+    ((apply op args) obs)))
 
 ; === sources ===
 
@@ -22,7 +33,7 @@
   (apply (.-of rxjs/Observable) xs))
 
 (defn defer [obs-factory-fn]
-  ((.-defer rxjs/Observable) (fn-2 obs-factory-fn)))
+  ((.-defer rxjs/Observable) (fn-0 obs-factory-fn)))
 
 (defn empty
   ([scheduler] ((.-empty rxjs/Observable) scheduler))
@@ -44,9 +55,9 @@
 
 (defn from-event-pattern
   ([add-handler remove-handler selector]
-   ((.-fromEventPattern rxjs/Observable) (fn-1 add-handler) (fn-3 remove-handler) selector))
+   ((.-fromEventPattern rxjs/Observable) (fn-1 add-handler) (fn-2 remove-handler) selector))
   ([add-handler remove-handler]
-   ((.-fromEventPattern rxjs/Observable) (fn-1 add-handler) (fn-3 remove-handler)))
+   ((.-fromEventPattern rxjs/Observable) (fn-1 add-handler) (fn-2 remove-handler)))
   ([add-handler]
    ((.-fromEventPattern rxjs/Observable) (fn-1 add-handler))))
 
@@ -89,10 +100,6 @@
   ([initial-delay]
    ((.-timer rxjs/Observable) initial-delay)))
 
-(defn zip [& observables]
-  (apply (.-zip rxjs/Observable) observables))
-
-
 ; === operators ===
 
 (defn audit [obs duration-selector]
@@ -127,18 +134,21 @@
   (.bufferToggle obs openings (fn-1 closing-selector)))
 
 (defn buffer-when [obs closing-selector]
-  (.bufferWhen obs (fn-1 closing-selector)))
+  (.bufferWhen obs (fn-0 closing-selector)))
 
 (defn catch* [obs selector]
   (.catch obs (fn-1 selector)))
 
-(defn combine-all [obs]
-  (.combineAll obs))
+(defn combine-all
+  ([obs project]
+   (.combineAll obs (fn-n project)))
+  ([obs]
+   (.combineAll obs)))
 
 (defn combine-latest [& observables]
   (if (core/empty? observables)
     (of [])
-    ((apply (.-combineLatest rxjs/operators) (rest observables)) (core/first observables))))
+    (apply-with-project (.-combineLatest rxjs/operators) (core/first observables) (rest observables))))
 
 (defn concat [& observables]
   (if (core/empty? observables)
@@ -150,13 +160,13 @@
 
 (defn concat-map
   ([obs project result-selector]
-   (.concatMap obs (fn-1 project) (fn-1 result-selector)))
+   (.concatMap obs (fn-1 project) (fn-2 result-selector)))
   ([obs project]
    (.concatMap obs (fn-1 project))))
 
 (defn concat-map-to
   ([obs inner-observable result-selector]
-   (.concatMapTo obs inner-observable (fn-1 result-selector)))
+   (.concatMapTo obs inner-observable (fn-2 result-selector)))
   ([obs inner-observable]
    (.concatMapTo obs inner-observable)))
 
@@ -210,14 +220,11 @@
   ([obs]
    (.distinctUntilChanged obs #(= %1 %2))))
 
-(defn do* [obs observer]
-  (.do obs (js-observer observer)))
-
 (defn element-at
   ([obs index default-value]
    (.elementAt obs index default-value))
   ([obs index]
-   (.elementAt obs index js/undefined)))
+   (.elementAt obs index)))
 
 (defn every? [obs predicate]
   (.every obs (fn-1 predicate)))
@@ -227,7 +234,7 @@
 
 (defn exhaust-map
   ([obs project result-selector]
-   (.exhaustMap obs (fn-1 project) (fn-1 result-selector)))
+   (.exhaustMap obs (fn-1 project) (fn-2 result-selector)))
   ([obs project]
    (.exhaustMap obs (fn-1 project))))
 
@@ -250,9 +257,9 @@
 
 (defn first
   ([obs predicate result-selector default-value]
-   (.first obs (fn-1 predicate) (fn-1 result-selector) default-value))
+   (.first obs (fn-1 predicate) (fn-2 result-selector) default-value))
   ([obs predicate result-selector]
-   (.first obs (fn-1 predicate) (fn-1 result-selector)))
+   (.first obs (fn-1 predicate) (fn-2 result-selector)))
   ([obs predicate]
    (.first obs (fn-1 predicate)))
   ([obs]
@@ -263,9 +270,9 @@
 
 (defn group-by
   ([obs key-selector result-selector duration-selector]
-   (.groupBy obs (fn-1 key-selector) (fn-1 result-selector) (fn-1 duration-selector)))
+   (.groupBy obs (fn-1 key-selector) (fn-2 result-selector) (fn-1 duration-selector)))
   ([obs key-selector result-selector]
-   (.groupBy obs (fn-1 key-selector) (fn-1 result-selector)))
+   (.groupBy obs (fn-1 key-selector) (fn-2 result-selector)))
   ([obs key-selector]
    (.groupBy obs (fn-1 key-selector))))
 
@@ -292,7 +299,7 @@
 
 (defn max
   ([obs comparer]
-   (.max obs (fn-3 comparer)))
+   (.max obs (fn-2 comparer)))
   ([obs]
    (.max obs)))
 
@@ -309,7 +316,7 @@
 
 (defn merge-map
   ([obs project result-selector concurrent]
-   (.mergeMap obs (fn-1 project) (fn-1 result-selector) concurrent))
+   (.mergeMap obs (fn-1 project) (fn-2 result-selector) concurrent))
   ([obs project result-selector]
    (.mergeMap obs (fn-1 project)))
   ([obs project]
@@ -317,21 +324,21 @@
 
 (defn merge-map-to
   ([obs inner-observable result-selector concurrent]
-   (.mergeMapTo obs inner-observable (fn-1 result-selector) concurrent))
+   (.mergeMapTo obs inner-observable (fn-2 result-selector) concurrent))
   ([obs inner-observable result-selector]
-   (.mergeMapTo obs inner-observable (fn-1 result-selector)))
+   (.mergeMapTo obs inner-observable (fn-2 result-selector)))
   ([obs inner-observable]
    (.mergeMapTo obs inner-observable)))
 
 (defn merge-scan
   ([obs accumulator seed concurrent]
-   (.mergeScan obs (fn-3 accumulator) seed concurrent))
+   (.mergeScan obs (fn-2 accumulator) seed concurrent))
   ([obs accumulator seed]
-   (.mergeScan obs (fn-3 accumulator) seed)))
+   (.mergeScan obs (fn-2 accumulator) seed)))
 
 (defn min
   ([obs comparer]
-   (.min obs (fn-3 comparer)))
+   (.min obs (fn-2 comparer)))
   ([obs]
    (.min obs)))
 
@@ -379,9 +386,9 @@
 
 (defn reduce
   ([obs accumulator seed]
-   (.reduce obs (fn-3 accumulator) seed))
+   (.reduce obs (fn-2 accumulator) seed))
   ([obs accumulator]
-   (.reduce obs (fn-3 accumulator))))
+   (.reduce obs (fn-2 accumulator))))
 
 (defn repeat [obs count]
   (.repeat obs count))
@@ -389,6 +396,155 @@
 (defn repeat-when [obs notifier]
   (.repeatWhen obs (fn-1 notifier)))
 
+(defn retry [obs count]
+  (.retry obs count))
+
+(defn retry-when [obs notifier]
+  (.retryWhen obs (fn-1 notifier)))
+
+(defn sample [obs notifier]
+  (.sample obs notifier))
+
+(defn sample-time
+  ([obs period scheduler]
+   (.sampleTime obs period scheduler))
+  ([obs period]
+   (.sampleTime obs period)))
+
+(defn scan
+  ([obs accumulator seed]
+   (.scan obs (fn-2 accumulator) seed))
+  ([obs accumulator]
+   (.scan obs (fn-2 accumulator))))
+
+(defn sequence-equal
+  ([obs compare-to comparator]
+   (.sequenceEqual obs compare-to (fn-2 comparator)))
+  ([obs compare-to]
+   (.sequenceEqual obs compare-to)))
+
+(defn share [obs]
+  (.share obs))
+
+(defn single [obs predicate]
+  (.single obs (fn-1 predicate)))
+
+(defn skip [obs count]
+  (.skip obs count))
+
+(defn skip-until [obs notifier]
+  (.skipUntil obs notifier))
+
+(defn skip-while [obs predicate]
+  (.skipWhile obs (fn-1 predicate)))
+
+(defn start-with [obs & values]
+  ((apply (.-startWith rxjs/operators) values) obs))
+
 (defn subscribe [obs observer]
   (.subscribe obs (js-observer observer)))
 
+(defn subscribe-on [obs scheduler]
+  (.subscribeOn obs scheduler))
+
+(defn switch [obs]
+  (.switch obs))
+
+(defn switch-map
+  ([obs project result-selector]
+   (.switchMap obs (fn-1 project) (fn-2 result-selector)))
+  ([obs project]
+   (.switchMap obs (fn-1 project))))
+
+(defn switch-map-to
+  ([obs inner-observable result-selector]
+   (.switchMapTo obs inner-observable (fn-2 result-selector)))
+  ([obs inner-observable]
+   (.switchMapTo obs inner-observable)))
+
+(defn take [obs count]
+  (.take obs count))
+
+(defn take-last [obs count]
+  (.takeLast obs count))
+
+(defn take-until [obs notifier]
+  (.takeUntil obs notifier))
+
+(defn take-while [obs predicate]
+  (.takeWhile obs (fn-1 predicate)))
+
+(defn tap [obs observer-or-on-next]
+  (let [observer (if (fn? observer-or-on-next)
+                   (fn-1 observer-or-on-next)
+                   (js-observer observer-or-on-next))]
+    (((.-tap rxjs/operators) observer) obs)))
+
+(defn throttle [obs duration-selector]
+  (.throttle obs (fn-1 duration-selector)))
+
+(defn throttle-time
+  ([obs duration scheduler]
+   (.throttleTime obs duration scheduler))
+  ([obs duration]
+   (.throttleTime obs duration)))
+
+(defn time-interval
+  ([obs scheduler]
+   (.timeInterval obs scheduler))
+  ([obs]
+   (.timeInterval obs)))
+
+(defn timeout
+  ([obs due scheduler]
+   (.timeout obs due scheduler))
+  ([obs due]
+   (.timeout obs due)))
+
+(defn timeout-with
+  ([obs due with-observable scheduler]
+   (.timeoutWith obs due with-observable scheduler))
+  ([obs due with-observable]
+   (.timeoutWith obs due with-observable)))
+
+(defn timestamp
+  ([obs scheduler]
+   (.timestamp obs scheduler))
+  ([obs]
+   (.timestamp obs)))
+
+(defn to-array [obs]
+  (.toArray obs))
+
+(defn to-promise
+  ([obs promise-ctor]
+   (.toPromise obs promise-ctor))
+  ([obs]
+   (.toPromise obs)))
+
+(defn window [obs window-boundaries]
+  (.window obs window-boundaries))
+
+(defn window-count
+  ([obs window-size start-window-every]
+   (.windowCount obs window-size start-window-every))
+  ([obs window-size]
+   (.windowCount obs window-size)))
+
+(defn window-toggle [obs openings closing-selector]
+  (.windowToggle openings (fn-1 closing-selector)))
+
+(defn window-when [obs closing-selector]
+  (.windowWhen obs (fn-0 closing-selector)))
+
+(defn with-latest-from [obs & others]
+  (apply-with-project (.-withLatestFrom rxjs/operators) obs others))
+
+(defn zip [& observables]
+  (apply (.-zipStatic rxjs/operators) observables))
+
+(defn zip-all
+  ([obs project]
+   (.zipAll obs (fn-n project)))
+  ([obs]
+   (.zipAll obs)))

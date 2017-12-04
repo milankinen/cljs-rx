@@ -32,26 +32,26 @@
        (into {})
        (clj->js)))
 
-(defn fn-2 [f]
-  {:pre [(or (fn? f) (undefined? f))]}
-  (if-not (undefined? f)
-    (if (preserve-arity? f)
-      (fn [& args] (apply f args))
-      (fn [] (f)))
+(defn fn-n [f]
+  {:pre [(fn? f)]}
+  (if-not (goog/isFunction f)
+    (fn [& args] (apply f args))
     f))
+
+(defn fn-0 [f]
+  {:pre [(fn? f)]}
+  (if (preserve-arity? f)
+    (fn-n f)
+    (fn [] (f))))
 
 (defn fn-1 [f]
-  {:pre [(or (fn? f) (undefined? f))]}
-  (if-not (undefined? f)
-    (if (preserve-arity? f)
-      (fn [& args] (apply f args))
-      (fn [a1] (f a1)))
-    f))
+  {:pre [(fn? f)]}
+  (if (preserve-arity? f)
+    (fn-n f)
+    (fn [a1] (f a1))))
 
-(defn fn-3 [f]
-  {:pre [(or (fn? f) (undefined? f))]}
-  (if-not (undefined? f)
-    (if (preserve-arity? f)
-      (fn [& args] (apply f args))
-      (fn [a1 a2] (f a1 a2)))
-    f))
+(defn fn-2 [f]
+  {:pre [(fn? f)]}
+  (if (preserve-arity? f)
+    (fn-n f)
+    (fn [a1 a2] (f a1 a2))))
