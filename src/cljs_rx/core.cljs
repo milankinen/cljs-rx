@@ -1,7 +1,7 @@
 (ns cljs-rx.core
   (:refer-clojure :exclude [map filter empty range concat count delay distinct first last every?
                             empty? group-by max min merge reduce find partition repeat take take-last
-                            take-while to-array throw catch])
+                            take-while to-array])
   (:require [cljs.core :as core]
             [cljsjs.rxjs :as rxjs]
             [cljs-rx.internal.interrop :refer [fn-0 fn-1 fn-2 fn-2 fn-n
@@ -107,11 +107,11 @@
   ([]
    ((.-range Observable))))
 
-(defn throw
-  ([error scheduler]
-   ((.-throw Observable) error scheduler))
-  ([error]
-   ((.-throw Observable) error)))
+(defn throw-error
+  ([err scheduler]
+   (.subscribeOn (-create (fn [{:keys [error complete]}] (error err))) scheduler))
+  ([err]
+   (-create (fn [{:keys [error]}] (error err)))))
 
 (defn timer
   ([initial-delay period scheduler]
@@ -157,8 +157,8 @@
 (defn buffer-when [obs closing-selector]
   (.bufferWhen obs (fn-0 closing-selector)))
 
-(defn catch [obs selector]
-  (.catch obs (fn-1 selector)))
+(defn catch-error [obs selector]
+  (((.-catchError operators) (fn-1 selector)) obs))
 
 (defn combine-all
   ([obs project]
