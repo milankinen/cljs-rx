@@ -32,7 +32,7 @@
        (into {})
        (clj->js)))
 
-(defn ari-0 [f]
+(defn fn-2 [f]
   {:pre [(or (fn? f) (undefined? f))]}
   (if-not (undefined? f)
     (if (preserve-arity? f)
@@ -40,7 +40,7 @@
       (fn [] (f)))
     f))
 
-(defn ari-1 [f]
+(defn fn-1 [f]
   {:pre [(or (fn? f) (undefined? f))]}
   (if-not (undefined? f)
     (if (preserve-arity? f)
@@ -48,7 +48,7 @@
       (fn [a1] (f a1)))
     f))
 
-(defn ari-2 [f]
+(defn fn-3 [f]
   {:pre [(or (fn? f) (undefined? f))]}
   (if-not (undefined? f)
     (if (preserve-arity? f)

@@ -1,10 +1,15 @@
 (ns cljs-rx.core
-  (:refer-clojure :exclude [map filter empty range concat count delay distinct
-                            first last every? empty? group-by max min merge
-                            reduce])
+  (:refer-clojure :exclude [map filter empty range concat count delay distinct first last every?
+                            empty? group-by max min merge reduce])
   (:require [cljs.core :as core]
             [cljsjs.rxjs :as rxjs]
-            [cljs-rx.internal.interrop :refer [ari-1 ari-0 ari-2 cljs-observer js-observer js-iterator]]))
+            [cljs-rx.internal.interrop :refer [fn-1 fn-2 fn-3 cljs-observer js-observer js-iterator]]))
+
+(defn ->ish [ish]
+  (if (or (sequential? ish)
+          (set? ish))
+    (js-iterator (seq ish))
+    ish))
 
 ; === sources ===
 
@@ -17,7 +22,7 @@
   (apply (.-of rxjs/Observable) xs))
 
 (defn defer [obs-factory-fn]
-  ((.-defer rxjs/Observable) (ari-0 obs-factory-fn)))
+  ((.-defer rxjs/Observable) (fn-2 obs-factory-fn)))
 
 (defn empty
   ([scheduler] ((.-empty rxjs/Observable) scheduler))
@@ -25,69 +30,68 @@
 
 (defn from
   ([ish scheduler]
-   (let [ish' (if (or (sequential? ish)
-                      (set? ish))
-                (js-iterator ish)
-                ish)]
-     ((.-from rxjs/Observable) ish' scheduler)))
+   ((.-from rxjs/Observable) (->ish ish) scheduler))
   ([ish]
-   (from ish js/undefined)))
+   ((.-from rxjs/Observable) (->ish ish))))
 
 (defn from-event
   ([event-target-like event-name opts selector]
-   (let [opts' (or (some-> opts (clj->js)) opts)]
-     ((.-fromEvent rxjs/Observable) event-target-like event-name opts' selector)))
+   ((.-fromEvent rxjs/Observable) event-target-like event-name (some-> opts (clj->js)) selector))
   ([event-target-like event-name opts]
-   (from-event event-target-like event-name opts js/undefined))
+   ((.-fromEvent rxjs/Observable) event-target-like event-name (some-> opts (clj->js))))
   ([event-target-like event-name]
-   (from-event event-target-like event-name js/undefined)))
+   ((.-fromEvent rxjs/Observable) event-target-like event-name)))
 
 (defn from-event-pattern
   ([add-handler remove-handler selector]
-   ((.-fromEventPattern rxjs/Observable) (ari-1 add-handler) (ari-2 remove-handler) selector))
+   ((.-fromEventPattern rxjs/Observable) (fn-1 add-handler) (fn-3 remove-handler) selector))
   ([add-handler remove-handler]
-   (from-event-pattern add-handler remove-handler js/undefined))
+   ((.-fromEventPattern rxjs/Observable) (fn-1 add-handler) (fn-3 remove-handler)))
   ([add-handler]
-   (from-event-pattern add-handler js/undefined)))
+   ((.-fromEventPattern rxjs/Observable) (fn-1 add-handler))))
 
 (defn from-promise
   ([js-promise scheduler]
    ((.-fromPromise rxjs/Observable) js-promise scheduler))
   ([js-promise]
-   (from-promise js-promise js/undefined)))
+   ((.-fromPromise rxjs/Observable) js-promise)))
 
 (defn interval
   ([period scheduler]
    ((.-interval rxjs/Observable) period scheduler))
   ([period]
-   (interval period js/undefined)))
+   ((.-interval rxjs/Observable) period)))
 
 (defn never []
   ((.-never rxjs/Observable)))
 
 (defn range
-  ([start count scheduler] ((.-range rxjs/Observable) start count scheduler))
-  ([start count] (range start count js/undefined))
-  ([start] (range start js/undefined))
-  ([] (range js/undefined)))
+  ([start count scheduler]
+   ((.-range rxjs/Observable) start count scheduler))
+  ([start count]
+   ((.-range rxjs/Observable) start count))
+  ([start]
+   ((.-range rxjs/Observable) start))
+  ([]
+   ((.-range rxjs/Observable))))
 
 (defn throw*
-  ([error scheduler] ((.-throw rxjs/Observable) error scheduler))
-  ([error] ((.-throw rxjs/Observable) error)))
+  ([error scheduler]
+   ((.-throw rxjs/Observable) error scheduler))
+  ([error]
+   ((.-throw rxjs/Observable) error)))
 
 (defn timer
   ([initial-delay period scheduler]
    ((.-timer rxjs/Observable) initial-delay period scheduler))
   ([initial-delay period]
-   (timer initial-delay period js/undefined))
+   ((.-timer rxjs/Observable) initial-delay period))
   ([initial-delay]
-   (timer initial-delay js/undefined)))
+   ((.-timer rxjs/Observable) initial-delay)))
 
 (defn zip [& observables]
   (apply (.-zip rxjs/Observable) observables))
 
-; TODO: implement
-; (defn web-socket [])
 
 ; === operators ===
 
@@ -98,7 +102,7 @@
   ([obs duration scheduler]
    (.auditTime obs duration scheduler))
   ([obs duration]
-   (audit-time obs duration js/undefined)))
+   (.auditTime obs duration)))
 
 (defn buffer [obs closing-notifier]
   (.buffer obs closing-notifier))
@@ -107,26 +111,26 @@
   ([obs buffer-size start-buffer-every]
    (.bufferCount obs buffer-size start-buffer-every))
   ([obs buffer-size]
-   (buffer-count obs buffer-size js/undefined)))
+   (.bufferCount obs buffer-size)))
 
 (defn buffer-time
   ([obs buffer-time-span buffer-creation-interval max-buffer-size scheduler]
    (.bufferTime obs buffer-time-span buffer-creation-interval max-buffer-size scheduler))
   ([obs buffer-time-span buffer-creation-interval max-buffer-size]
-   (buffer-time obs buffer-time-span buffer-creation-interval max-buffer-size js/undefined))
+   (.bufferTime obs buffer-time-span buffer-creation-interval max-buffer-size))
   ([obs buffer-time-span buffer-creation-interval]
-   (buffer-time obs buffer-time-span buffer-creation-interval js/undefined))
+   (.bufferTime obs buffer-time-span buffer-creation-interval))
   ([obs buffer-time-span]
-   (buffer-time obs buffer-time-span js/undefined)))
+   (.bufferTime obs buffer-time-span)))
 
 (defn buffer-toggle [obs openings closing-selector]
-  (.bufferToggle obs openings (ari-1 closing-selector)))
+  (.bufferToggle obs openings (fn-1 closing-selector)))
 
 (defn buffer-when [obs closing-selector]
-  (.bufferWhen obs (ari-1 closing-selector)))
+  (.bufferWhen obs (fn-1 closing-selector)))
 
 (defn catch* [obs selector]
-  (.catch obs (ari-1 selector)))
+  (.catch obs (fn-1 selector)))
 
 (defn combine-all [obs]
   (.combineAll obs))
@@ -146,59 +150,63 @@
 
 (defn concat-map
   ([obs project result-selector]
-   (.concatMap obs (ari-1 project) (ari-1 result-selector)))
+   (.concatMap obs (fn-1 project) (fn-1 result-selector)))
   ([obs project]
-   (concat-map obs project js/undefined)))
+   (.concatMap obs (fn-1 project))))
 
 (defn concat-map-to
   ([obs inner-observable result-selector]
-   (.concatMapTo obs inner-observable (ari-1 result-selector)))
+   (.concatMapTo obs inner-observable (fn-1 result-selector)))
   ([obs inner-observable]
-   (concat-map-to obs inner-observable js/undefined)))
+   (.concatMapTo obs inner-observable)))
 
 (defn count
-  ([obs predicate] (.count obs (ari-1 predicate)))
-  ([obs] (count obs js/undefined)))
+  ([obs predicate]
+   (.count obs (fn-1 predicate)))
+  ([obs]
+   (.count obs)))
 
 (defn debounce [obs duration-selector]
-  (.debounce obs (ari-1 duration-selector)))
+  (.debounce obs (fn-1 duration-selector)))
 
 (defn debounce-time
   ([obs due-time scheduler]
    (.debounceTime obs due-time scheduler))
   ([obs due-time]
-   (debounce-time obs due-time js/undefined)))
+   (.debounceTime obs due-time)))
 
 (defn default-if-empty
-  ([obs default-value] (.defaultIfEmpty obs default-value))
-  ([obs] (.defaultIfEmpty obs)))
+  ([obs default-value]
+   (.defaultIfEmpty obs default-value))
+  ([obs]
+   (.defaultIfEmpty obs)))
 
 (defn delay
   ([obs time-or-date scheduler]
    (.delay obs time-or-date scheduler))
   ([obs time-or-date]
-   (delay obs time-or-date js/undefined)))
+   (.delay obs time-or-date)))
 
 (defn delay-when
   ([obs duration-selector subscription-delay]
-   (.delayWhen obs (ari-1 duration-selector) subscription-delay))
+   (.delayWhen obs (fn-1 duration-selector) subscription-delay))
   ([obs duration-selector]
-   (delay-when obs duration-selector js/undefined)))
+   (.delayWhen obs (fn-1 duration-selector))))
 
 (defn dematerialize [obs]
   (.dematerialize obs))
 
 (defn distinct
   ([obs key-selector flushes]
-   (.distinct obs (ari-1 key-selector) flushes))
+   (.distinct obs (fn-1 key-selector) flushes))
   ([obs key-selector]
-   (distinct obs key-selector js/undefined))
+   (.distinct obs (fn-1 key-selector)))
   ([obs]
-   (distinct obs js/undefined)))
+   (.distinct obs)))
 
 (defn distinct-until-changed
   ([obs comparator]
-   (.distinctUntilChanged obs (ari-2 comparator)))
+   (.distinctUntilChanged obs (fn-2 comparator)))
   ([obs]
    (.distinctUntilChanged obs #(= %1 %2))))
 
@@ -212,54 +220,54 @@
    (.elementAt obs index js/undefined)))
 
 (defn every? [obs predicate]
-  (.every obs (ari-1 predicate)))
+  (.every obs (fn-1 predicate)))
 
 (defn exhaust [obs]
   (.exhaust obs))
 
 (defn exhaust-map
   ([obs project result-selector]
-   (.exhaustMap obs (ari-1 project) (ari-1 result-selector)))
+   (.exhaustMap obs (fn-1 project) (fn-1 result-selector)))
   ([obs project]
-   (exhaust-map obs project js/undefined)))
+   (.exhaustMap obs (fn-1 project))))
 
 (defn expand
   ([obs project concurrent scheduler]
-   (.expand obs (ari-1 project) concurrent scheduler))
+   (.expand obs (fn-1 project) concurrent scheduler))
   ([obs project concurrent]
-   (expand obs project concurrent js/undefined))
+   (.expand obs (fn-1 project) concurrent))
   ([obs project]
-   (expand obs project js/undefined)))
+   (.expand obs (fn-1 project))))
 
 (defn filter [obs predicate]
-  (.filter obs (ari-1 predicate)))
+  (.filter obs (fn-1 predicate)))
 
 (defn find [obs predicate]
-  (.find obs (ari-1 predicate)))
+  (.find obs (fn-1 predicate)))
 
 (defn find-index [obs predicate]
-  (.findIndex obs (ari-1 predicate)))
+  (.findIndex obs (fn-1 predicate)))
 
 (defn first
   ([obs predicate result-selector default-value]
-   (.first obs (ari-1 predicate) (ari-1 result-selector) default-value))
+   (.first obs (fn-1 predicate) (fn-1 result-selector) default-value))
   ([obs predicate result-selector]
-   (first obs predicate result-selector js/undefined))
+   (.first obs (fn-1 predicate) (fn-1 result-selector)))
   ([obs predicate]
-   (first obs predicate js/undefined))
+   (.first obs (fn-1 predicate)))
   ([obs]
    (.first obs)))
 
 (defn for-each [obs on-next]
-  (.forEach obs (ari-1 on-next)))
+  (.forEach obs (fn-1 on-next)))
 
 (defn group-by
   ([obs key-selector result-selector duration-selector]
-   (.groupBy obs (ari-1 key-selector) (ari-1 result-selector) (ari-1 duration-selector)))
+   (.groupBy obs (fn-1 key-selector) (fn-1 result-selector) (fn-1 duration-selector)))
   ([obs key-selector result-selector]
-   (group-by obs key-selector result-selector js/undefined))
+   (.groupBy obs (fn-1 key-selector) (fn-1 result-selector)))
   ([obs key-selector]
-   (group-by obs key-selector)))
+   (.groupBy obs (fn-1 key-selector))))
 
 (defn ignore-elements [obs]
   (.ignoreElements obs))
@@ -269,12 +277,12 @@
 
 (defn last
   ([obs predicate]
-   (.last obs (ari-1 predicate)))
+   (.last obs (fn-1 predicate)))
   ([obs]
    (.last obs)))
 
 (defn map [obs f]
-  (.map obs (ari-1 f)))
+  (.map obs (fn-1 f)))
 
 (defn map-to [obs value]
   (.mapTo obs value))
@@ -284,7 +292,7 @@
 
 (defn max
   ([obs comparer]
-   (.max obs (ari-2 comparer)))
+   (.max obs (fn-3 comparer)))
   ([obs]
    (.max obs)))
 
@@ -301,37 +309,37 @@
 
 (defn merge-map
   ([obs project result-selector concurrent]
-   (.mergeMap obs (ari-1 project) (ari-1 result-selector) concurrent))
+   (.mergeMap obs (fn-1 project) (fn-1 result-selector) concurrent))
   ([obs project result-selector]
-   (merge-map obs project result-selector js/undefined))
+   (.mergeMap obs (fn-1 project)))
   ([obs project]
-   (merge-map obs project js/undefined)))
+   (.mergeMap obs (fn-1 project))))
 
 (defn merge-map-to
   ([obs inner-observable result-selector concurrent]
-   (.mergeMapTo obs inner-observable (ari-1 result-selector) concurrent))
+   (.mergeMapTo obs inner-observable (fn-1 result-selector) concurrent))
   ([obs inner-observable result-selector]
-   (merge-map-to obs inner-observable result-selector js/undefined))
+   (.mergeMapTo obs inner-observable (fn-1 result-selector)))
   ([obs inner-observable]
-   (merge-map-to obs inner-observable js/undefined)))
+   (.mergeMapTo obs inner-observable)))
 
 (defn merge-scan
   ([obs accumulator seed concurrent]
-   (.mergeScan obs (ari-2 accumulator) seed concurrent))
+   (.mergeScan obs (fn-3 accumulator) seed concurrent))
   ([obs accumulator seed]
-   (merge-scan obs accumulator seed js/undefined)))
+   (.mergeScan obs (fn-3 accumulator) seed)))
 
 (defn min
   ([obs comparer]
-   (.min obs (ari-2 comparer)))
+   (.min obs (fn-3 comparer)))
   ([obs]
    (.min obs)))
 
 (defn multicast
   ([obs subject-or-subject-factory selector]
-   (.multicast subject-or-subject-factory (ari-1 selector)))
+   (.multicast subject-or-subject-factory (fn-1 selector)))
   ([obs subject-or-subject-factory]
-   (multicast obs subject-or-subject-factory js/undefined)))
+   (.multicast subject-or-subject-factory)))
 
 (defn observe-on [obs scheduler delay]
   (.observeOn obs scheduler delay))
@@ -340,7 +348,7 @@
   (.pairwise obs))
 
 (defn partition [obs predicate]
-  (.partition obs (ari-1 predicate)))
+  (.partition obs (fn-1 predicate)))
 
 (defn pluck [obs & props]
   (((apply (.-pluck rxjs/operators) props) obs)))
@@ -358,11 +366,11 @@
   ([obs buffer-size window-size scheduler]
    (.publishReplay obs buffer-size window-size scheduler))
   ([obs buffer-size window-size]
-   (publish-replay obs buffer-size window-size js/undefined))
+   (.publishReplay obs buffer-size window-size))
   ([obs buffer-size]
-   (publish-replay obs buffer-size js/undefined))
+   (.publishReplay obs buffer-size))
   ([obs]
-   (publish-replay obs js/undefined)))
+   (.publishReplay obs)))
 
 (defn race [& observables]
   (if (core/empty? observables)
@@ -371,15 +379,15 @@
 
 (defn reduce
   ([obs accumulator seed]
-   (.reduce obs (ari-2 accumulator) seed))
+   (.reduce obs (fn-3 accumulator) seed))
   ([obs accumulator]
-   (reduce obs accumulator js/undefined)))
+   (.reduce obs (fn-3 accumulator))))
 
 (defn repeat [obs count]
   (.repeat obs count))
 
 (defn repeat-when [obs notifier]
-  (.repeatWhen obs (ari-1 notifier)))
+  (.repeatWhen obs (fn-1 notifier)))
 
 (defn subscribe [obs observer]
   (.subscribe obs (js-observer observer)))
