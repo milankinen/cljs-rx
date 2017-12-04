@@ -67,6 +67,6 @@
 
 (defn delete
   ([url headers]
-   (rx/map ((.-delete ajax) url (clj->js headers)) ->clj-response))
+   (request {:url url :headers headers :method "DELETE"}))
   ([url]
    (delete url {})))
