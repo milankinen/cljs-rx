@@ -11,7 +11,6 @@
 
 (def TestScheduler rxjs/TestScheduler)
 
-
 ; === factories ===
 
 (defn test-scheduler [deep-equals-assertion]
@@ -19,7 +18,7 @@
 
 ; TODO: implement virtual time scheduler
 #_(defn virtual-time-scheduler []
-    (VirtualTimeScheduler.))
+  (VirtualTimeScheduler. ))
 
 
 ; === globals ===
