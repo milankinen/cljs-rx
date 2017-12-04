@@ -469,7 +469,7 @@
   (.subscribeOn obs scheduler))
 
 (defn switch [obs]
-  (.switch obs))
+  ((.-switchAll operators) obs))
 
 (defn switch-map
   ([obs project result-selector]
