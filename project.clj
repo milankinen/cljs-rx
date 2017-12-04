@@ -1,4 +1,4 @@
-(defproject cljs-rx "5.5.2.0"
+(defproject milankinen/cljs-rx "5.5.2.0"
   :description "RxJS bindings for ClojureScript"
   :url "https://github.com/milankinen/cljs-rx"
   :license {:name "MIT"
@@ -19,20 +19,16 @@
   :cljsbuild
   {:builds {:min
             {:source-paths ["src"]
-             :compiler     {:main          "cljs-rx.main"
-                            :output-to     "target/cljsbuild/public/js/app.js"
+             :compiler     {:output-to     "target/cljsbuild/public/js/app.js"
                             :output-dir    "target/cljsbuild/public/js"
                             :source-map    "target/cljsbuild/public/js/app.js.map"
                             :optimizations :advanced
-                            :pretty-print  false
-                            :infer-externs true}}
+                            :pretty-print  false}}
             :app
             {:source-paths ["src"]
-             :compiler     {:main          "cljs-rx.main"
-                            :asset-path    "/js/out"
+             :compiler     {:asset-path    "/js/out"
                             :output-to     "target/cljsbuild/public/js/app.js"
                             :output-dir    "target/cljsbuild/public/js/out"
                             :source-map    true
                             :optimizations :none
-                            :pretty-print  true
-                            :infer-externs true}}}})
+                            :pretty-print  true}}}})
