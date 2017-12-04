@@ -109,7 +109,7 @@
 
 (defn throw-error
   ([err scheduler]
-   (.subscribeOn (-create (fn [{:keys [error complete]}] (error err))) scheduler))
+   (.subscribeOn (-create (fn [{:keys [error]}] (error err))) scheduler))
   ([err]
    (-create (fn [{:keys [error]}] (error err)))))
 
