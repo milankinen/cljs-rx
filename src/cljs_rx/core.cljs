@@ -9,6 +9,10 @@
                                                js-observer
                                                js-iterator]]))
 
+(def ^:private Observable rxjs/Observable)
+
+(def ^:private operators rxjs/operators)
+
 (defn- ->ish [ish]
   (if (or (sequential? ish)
           (set? ish))
@@ -27,78 +31,78 @@
 (defn create [on-subscribe]
   (letfn [(wrapped-subs [observer]
             (on-subscribe (cljs-observer observer)))]
-    ((.-create rxjs/Observable) wrapped-subs)))
+    ((.-create Observable) wrapped-subs)))
 
 (defn of [& xs]
-  (apply (.-of rxjs/Observable) xs))
+  (apply (.-of Observable) xs))
 
 (defn defer [obs-factory-fn]
-  ((.-defer rxjs/Observable) (fn-0 obs-factory-fn)))
+  ((.-defer Observable) (fn-0 obs-factory-fn)))
 
 (defn empty
-  ([scheduler] ((.-empty rxjs/Observable) scheduler))
+  ([scheduler] ((.-empty Observable) scheduler))
   ([] (empty js/undefined)))
 
 (defn from
   ([ish scheduler]
-   ((.-from rxjs/Observable) (->ish ish) scheduler))
+   ((.-from Observable) (->ish ish) scheduler))
   ([ish]
-   ((.-from rxjs/Observable) (->ish ish))))
+   ((.-from Observable) (->ish ish))))
 
 (defn from-event
   ([event-target-like event-name opts selector]
-   ((.-fromEvent rxjs/Observable) event-target-like event-name (some-> opts (clj->js)) selector))
+   ((.-fromEvent Observable) event-target-like event-name (some-> opts (clj->js)) selector))
   ([event-target-like event-name opts]
-   ((.-fromEvent rxjs/Observable) event-target-like event-name (some-> opts (clj->js))))
+   ((.-fromEvent Observable) event-target-like event-name (some-> opts (clj->js))))
   ([event-target-like event-name]
-   ((.-fromEvent rxjs/Observable) event-target-like event-name)))
+   ((.-fromEvent Observable) event-target-like event-name)))
 
 (defn from-event-pattern
   ([add-handler remove-handler selector]
-   ((.-fromEventPattern rxjs/Observable) (fn-1 add-handler) (fn-2 remove-handler) selector))
+   ((.-fromEventPattern Observable) (fn-1 add-handler) (fn-2 remove-handler) selector))
   ([add-handler remove-handler]
-   ((.-fromEventPattern rxjs/Observable) (fn-1 add-handler) (fn-2 remove-handler)))
+   ((.-fromEventPattern Observable) (fn-1 add-handler) (fn-2 remove-handler)))
   ([add-handler]
-   ((.-fromEventPattern rxjs/Observable) (fn-1 add-handler))))
+   ((.-fromEventPattern Observable) (fn-1 add-handler))))
 
 (defn from-promise
   ([js-promise scheduler]
-   ((.-fromPromise rxjs/Observable) js-promise scheduler))
+   ((.-fromPromise Observable) js-promise scheduler))
   ([js-promise]
-   ((.-fromPromise rxjs/Observable) js-promise)))
+   ((.-fromPromise Observable) js-promise)))
 
 (defn interval
   ([period scheduler]
-   ((.-interval rxjs/Observable) period scheduler))
+   ((.-interval Observable) period scheduler))
   ([period]
-   ((.-interval rxjs/Observable) period)))
+   ((.-interval Observable) period)))
 
 (defn never []
-  ((.-never rxjs/Observable)))
+  ((.-never Observable)))
 
 (defn range
   ([start count scheduler]
-   ((.-range rxjs/Observable) start count scheduler))
+   ((.-range Observable) start count scheduler))
   ([start count]
-   ((.-range rxjs/Observable) start count))
+   ((.-range Observable) start count))
   ([start]
-   ((.-range rxjs/Observable) start))
+   ((.-range Observable) start))
   ([]
-   ((.-range rxjs/Observable))))
+   ((.-range Observable))))
 
 (defn throw*
   ([error scheduler]
-   ((.-throw rxjs/Observable) error scheduler))
+   ((.-throw Observable) error scheduler))
   ([error]
-   ((.-throw rxjs/Observable) error)))
+   ((.-throw Observable) error)))
 
 (defn timer
   ([initial-delay period scheduler]
-   ((.-timer rxjs/Observable) initial-delay period scheduler))
+   ((.-timer Observable) initial-delay period scheduler))
   ([initial-delay period]
-   ((.-timer rxjs/Observable) initial-delay period))
+   ((.-timer Observable) initial-delay period))
   ([initial-delay]
-   ((.-timer rxjs/Observable) initial-delay)))
+   ((.-timer Observable) initial-delay)))
 
 ; === operators ===
 
@@ -148,12 +152,12 @@
 (defn combine-latest [& observables]
   (if (core/empty? observables)
     (of [])
-    (apply-with-project (.-combineLatest rxjs/operators) (core/first observables) (rest observables))))
+    (apply-with-project (.-combineLatest operators) (core/first observables) (rest observables))))
 
 (defn concat [& observables]
   (if (core/empty? observables)
     (empty)
-    ((apply (.-concat rxjs/operators) (rest observables)) (core/first observables))))
+    ((apply (.-concat operators) (rest observables)) (core/first observables))))
 
 (defn concat-all [obs]
   (.concatAll obs))
@@ -265,7 +269,7 @@
   ([obs]
    (.first obs)))
 
-(defn for-each [obs on-next]
+(defn for-each! [obs on-next]
   (.forEach obs (fn-1 on-next)))
 
 (defn group-by
@@ -306,7 +310,7 @@
 (defn merge [& observables]
   (if (core/empty? observables)
     (empty)
-    ((apply (.-merge rxjs/operators) (core/rest observables)) (core/first observables))))
+    ((apply (.-merge operators) (core/rest observables)) (core/first observables))))
 
 (defn merge-all
   ([obs concurrent]
@@ -358,7 +362,7 @@
   (.partition obs (fn-1 predicate)))
 
 (defn pluck [obs & props]
-  (((apply (.-pluck rxjs/operators) props) obs)))
+  (((apply (.-pluck operators) props) obs)))
 
 (defn publish [obs]
   (.publish obs))
@@ -382,7 +386,7 @@
 (defn race [& observables]
   (if (core/empty? observables)
     (empty)
-    (((apply (.-race rxjs/operators) (core/rest observables)) (core/first observables)))))
+    (((apply (.-race operators) (core/rest observables)) (core/first observables)))))
 
 (defn reduce
   ([obs accumulator seed]
@@ -439,9 +443,9 @@
   (.skipWhile obs (fn-1 predicate)))
 
 (defn start-with [obs & values]
-  ((apply (.-startWith rxjs/operators) values) obs))
+  ((apply (.-startWith operators) values) obs))
 
-(defn subscribe [obs observer]
+(defn subscribe! [obs observer]
   (.subscribe obs (js-observer observer)))
 
 (defn subscribe-on [obs scheduler]
@@ -478,7 +482,7 @@
   (let [observer (if (fn? observer-or-on-next)
                    (fn-1 observer-or-on-next)
                    (js-observer observer-or-on-next))]
-    (((.-tap rxjs/operators) observer) obs)))
+    (((.-tap operators) observer) obs)))
 
 (defn throttle [obs duration-selector]
   (.throttle obs (fn-1 duration-selector)))
@@ -513,10 +517,10 @@
   ([obs]
    (.timestamp obs)))
 
-(defn to-array [obs]
+(defn to-array! [obs]
   (.toArray obs))
 
-(defn to-promise
+(defn to-promise!
   ([obs promise-ctor]
    (.toPromise obs promise-ctor))
   ([obs]
@@ -538,13 +542,14 @@
   (.windowWhen obs (fn-0 closing-selector)))
 
 (defn with-latest-from [obs & others]
-  (apply-with-project (.-withLatestFrom rxjs/operators) obs others))
+  (apply-with-project (.-withLatestFrom operators) obs others))
 
 (defn zip [& observables]
-  (apply (.-zipStatic rxjs/operators) observables))
+  (apply (.-zipStatic operators) observables))
 
 (defn zip-all
   ([obs project]
    (.zipAll obs (fn-n project)))
   ([obs]
    (.zipAll obs)))
+
