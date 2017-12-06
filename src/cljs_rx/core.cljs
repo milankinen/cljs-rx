@@ -5,6 +5,7 @@
   (:require [cljs.core :as core]
             [cljsjs.rxjs :as rxjs]
             [cljs-rx.internal.interrop :refer [fn-0 fn-1 fn-2 fn-2 fn-n
+                                               function?
                                                cljs-observer
                                                js-observer
                                                js-iterator]]))
@@ -40,7 +41,7 @@
 
 (defn- apply-with-project [op obs others]
   (let [project (core/last others)
-        args    (if (fn? project)
+        args    (if (function? project)
                   (conj (vec (core/drop-last 1 others)) (fn-n project))
                   others)]
     ((apply op args) obs)))
@@ -499,7 +500,7 @@
   (.takeWhile obs (fn-1 predicate)))
 
 (defn tap [obs observer-or-on-next]
-  (let [observer (if (fn? observer-or-on-next)
+  (let [observer (if (function? observer-or-on-next)
                    (fn-1 observer-or-on-next)
                    (js-observer observer-or-on-next))]
     (((.-tap operators) observer) obs)))
