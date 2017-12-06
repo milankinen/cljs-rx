@@ -14,6 +14,10 @@
 
 (def ^:private operators rxjs/operators)
 
+(defn- connectable? [x]
+  (and (instance? Observable x)
+       (fn? (.-connect x))))
+
 (defn- -create [on-subscribe]
   (letfn [(wrapped-subs [observer]
             (on-subscribe (cljs-observer observer)))]
@@ -194,6 +198,10 @@
    (.concatMapTo obs inner-observable (fn-2 result-selector)))
   ([obs inner-observable]
    (.concatMapTo obs inner-observable)))
+
+(defn connect! [obs]
+  {:pre [(connectable? obs)]}
+  (.connect obs))
 
 (defn count
   ([obs predicate]
@@ -408,6 +416,10 @@
   (if (core/empty? observables)
     (empty)
     (((apply (.-race operators) (core/rest observables)) (core/first observables)))))
+
+(defn ref-count [obs]
+  {:pre [(connectable? obs)]}
+  (.refCount obs))
 
 (defn reduce
   ([obs accumulator seed]
