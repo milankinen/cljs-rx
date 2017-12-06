@@ -1,4 +1,4 @@
-(defproject milankinen/cljs-rx "5.5.2.0"
+(defproject milankinen/cljs-rx "5.5.2.1"
   :description "RxJS bindings for ClojureScript"
   :url "https://github.com/milankinen/cljs-rx"
   :license {:name "MIT"
