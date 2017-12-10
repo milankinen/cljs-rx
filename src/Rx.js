@@ -541,17 +541,16 @@ function tryCatch(fn) {
  * An error thrown when one or more errors have occurred during the
  * `unsubscribe` of a {@link Subscription}.
  */
-var UnsubscriptionError = /** @class */ (function (_super) {
+var UnsubscriptionError = (function (_super) {
     __extends(UnsubscriptionError, _super);
     function UnsubscriptionError(errors) {
-        var _this = _super.call(this) || this;
-        _this.errors = errors;
-        var err = Error.call(_this, errors ?
-            errors.length + " errors occurred during unsubscription:\n  " + errors.map(function (err, i) { return i + 1 + ") " + err.toString(); }).join('\n  ') : '');
-        _this.name = err.name = 'UnsubscriptionError';
-        _this.stack = err.stack;
-        _this.message = err.message;
-        return _this;
+        _super.call(this);
+        this.errors = errors;
+        var err = Error.call(this, errors ?
+            errors.length + " errors occurred during unsubscription:\n  " + errors.map(function (err, i) { return ((i + 1) + ") " + err.toString()); }).join('\n  ') : '');
+        this.name = err.name = 'UnsubscriptionError';
+        this.stack = err.stack;
+        this.message = err.message;
     }
     return UnsubscriptionError;
 }(Error));
@@ -568,7 +567,7 @@ var UnsubscriptionError = /** @class */ (function (_super) {
  *
  * @class Subscription
  */
-var Subscription = /** @class */ (function () {
+var Subscription = (function () {
     /**
      * @param {function(): void} [unsubscribe] A function describing how to
      * perform the disposal of resources when the `unsubscribe` method is called.
@@ -765,7 +764,7 @@ var rxSubscriber = (typeof Symbol$2 === 'function' && typeof Symbol$2.for === 'f
  *
  * @class Subscriber<T>
  */
-var Subscriber = /** @class */ (function (_super) {
+var Subscriber = (function (_super) {
     __extends(Subscriber, _super);
     /**
      * @param {Observer|function(value: T): void} [destinationOrNext] A partially
@@ -776,37 +775,36 @@ var Subscriber = /** @class */ (function (_super) {
      * Observer.
      */
     function Subscriber(destinationOrNext, error, complete) {
-        var _this = _super.call(this) || this;
-        _this.syncErrorValue = null;
-        _this.syncErrorThrown = false;
-        _this.syncErrorThrowable = false;
-        _this.isStopped = false;
+        _super.call(this);
+        this.syncErrorValue = null;
+        this.syncErrorThrown = false;
+        this.syncErrorThrowable = false;
+        this.isStopped = false;
         switch (arguments.length) {
             case 0:
-                _this.destination = empty;
+                this.destination = empty;
                 break;
             case 1:
                 if (!destinationOrNext) {
-                    _this.destination = empty;
+                    this.destination = empty;
                     break;
                 }
                 if (typeof destinationOrNext === 'object') {
                     if (destinationOrNext instanceof Subscriber) {
-                        _this.destination = destinationOrNext;
-                        _this.destination.add(_this);
+                        this.destination = destinationOrNext;
+                        this.destination.add(this);
                     }
                     else {
-                        _this.syncErrorThrowable = true;
-                        _this.destination = new SafeSubscriber(_this, destinationOrNext);
+                        this.syncErrorThrowable = true;
+                        this.destination = new SafeSubscriber(this, destinationOrNext);
                     }
                     break;
                 }
             default:
-                _this.syncErrorThrowable = true;
-                _this.destination = new SafeSubscriber(_this, destinationOrNext, error, complete);
+                this.syncErrorThrowable = true;
+                this.destination = new SafeSubscriber(this, destinationOrNext, error, complete);
                 break;
         }
-        return _this;
     }
     Subscriber.prototype[rxSubscriber] = function () { return this; };
     /**
@@ -898,13 +896,13 @@ var Subscriber = /** @class */ (function (_super) {
  * @ignore
  * @extends {Ignored}
  */
-var SafeSubscriber = /** @class */ (function (_super) {
+var SafeSubscriber = (function (_super) {
     __extends(SafeSubscriber, _super);
     function SafeSubscriber(_parentSubscriber, observerOrNext, error, complete) {
-        var _this = _super.call(this) || this;
-        _this._parentSubscriber = _parentSubscriber;
+        _super.call(this);
+        this._parentSubscriber = _parentSubscriber;
         var next;
-        var context = _this;
+        var context = this;
         if (isFunction(observerOrNext)) {
             next = observerOrNext;
         }
@@ -915,16 +913,15 @@ var SafeSubscriber = /** @class */ (function (_super) {
             if (observerOrNext !== empty) {
                 context = Object.create(observerOrNext);
                 if (isFunction(context.unsubscribe)) {
-                    _this.add(context.unsubscribe.bind(context));
+                    this.add(context.unsubscribe.bind(context));
                 }
-                context.unsubscribe = _this.unsubscribe.bind(_this);
+                context.unsubscribe = this.unsubscribe.bind(this);
             }
         }
-        _this._context = context;
-        _this._next = next;
-        _this._error = error;
-        _this._complete = complete;
-        return _this;
+        this._context = context;
+        this._next = next;
+        this._error = error;
+        this._complete = complete;
     }
     SafeSubscriber.prototype.next = function (value) {
         if (!this.isStopped && this._next) {
@@ -1054,7 +1051,7 @@ function noop() { }
 function pipe() {
     var fns = [];
     for (var _i = 0; _i < arguments.length; _i++) {
-        fns[_i] = arguments[_i];
+        fns[_i - 0] = arguments[_i];
     }
     return pipeFromArray(fns);
 }
@@ -1077,7 +1074,7 @@ function pipeFromArray(fns) {
  *
  * @class Observable<T>
  */
-var Observable = /** @class */ (function () {
+var Observable = (function () {
     /**
      * @constructor
      * @param {Function} subscribe the function that is called when the Observable is
@@ -1328,7 +1325,7 @@ var Observable = /** @class */ (function () {
     Observable.prototype.pipe = function () {
         var operations = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            operations[_i] = arguments[_i];
+            operations[_i - 0] = arguments[_i];
         }
         if (operations.length === 0) {
             return this;
@@ -1379,15 +1376,13 @@ var Observable = /** @class */ (function () {
  *
  * @class ObjectUnsubscribedError
  */
-var ObjectUnsubscribedError = /** @class */ (function (_super) {
+var ObjectUnsubscribedError = (function (_super) {
     __extends(ObjectUnsubscribedError, _super);
     function ObjectUnsubscribedError() {
-        var _this = this;
-        var err = _this = _super.call(this, 'object unsubscribed') || this;
-        _this.name = err.name = 'ObjectUnsubscribedError';
-        _this.stack = err.stack;
-        _this.message = err.message;
-        return _this;
+        var err = _super.call(this, 'object unsubscribed');
+        this.name = err.name = 'ObjectUnsubscribedError';
+        this.stack = err.stack;
+        this.message = err.message;
     }
     return ObjectUnsubscribedError;
 }(Error));
@@ -1397,14 +1392,13 @@ var ObjectUnsubscribedError = /** @class */ (function (_super) {
  * @ignore
  * @extends {Ignored}
  */
-var SubjectSubscription = /** @class */ (function (_super) {
+var SubjectSubscription = (function (_super) {
     __extends(SubjectSubscription, _super);
     function SubjectSubscription(subject, subscriber) {
-        var _this = _super.call(this) || this;
-        _this.subject = subject;
-        _this.subscriber = subscriber;
-        _this.closed = false;
-        return _this;
+        _super.call(this);
+        this.subject = subject;
+        this.subscriber = subscriber;
+        this.closed = false;
     }
     SubjectSubscription.prototype.unsubscribe = function () {
         if (this.closed) {
@@ -1428,28 +1422,26 @@ var SubjectSubscription = /** @class */ (function (_super) {
 /**
  * @class SubjectSubscriber<T>
  */
-var SubjectSubscriber = /** @class */ (function (_super) {
+var SubjectSubscriber = (function (_super) {
     __extends(SubjectSubscriber, _super);
     function SubjectSubscriber(destination) {
-        var _this = _super.call(this, destination) || this;
-        _this.destination = destination;
-        return _this;
+        _super.call(this, destination);
+        this.destination = destination;
     }
     return SubjectSubscriber;
 }(Subscriber));
 /**
  * @class Subject<T>
  */
-var Subject = /** @class */ (function (_super) {
+var Subject = (function (_super) {
     __extends(Subject, _super);
     function Subject() {
-        var _this = _super.call(this) || this;
-        _this.observers = [];
-        _this.closed = false;
-        _this.isStopped = false;
-        _this.hasError = false;
-        _this.thrownError = null;
-        return _this;
+        _super.call(this);
+        this.observers = [];
+        this.closed = false;
+        this.isStopped = false;
+        this.hasError = false;
+        this.thrownError = null;
     }
     Subject.prototype[rxSubscriber] = function () {
         return new SubjectSubscriber(this);
@@ -1543,13 +1535,12 @@ var Subject = /** @class */ (function (_super) {
 /**
  * @class AnonymousSubject<T>
  */
-var AnonymousSubject = /** @class */ (function (_super) {
+var AnonymousSubject = (function (_super) {
     __extends(AnonymousSubject, _super);
     function AnonymousSubject(destination, source) {
-        var _this = _super.call(this) || this;
-        _this.destination = destination;
-        _this.source = source;
-        return _this;
+        _super.call(this);
+        this.destination = destination;
+        this.source = source;
     }
     AnonymousSubject.prototype.next = function (value) {
         var destination = this.destination;
@@ -1584,14 +1575,13 @@ var AnonymousSubject = /** @class */ (function (_super) {
 /**
  * @class AsyncSubject<T>
  */
-var AsyncSubject = /** @class */ (function (_super) {
+var AsyncSubject = (function (_super) {
     __extends(AsyncSubject, _super);
     function AsyncSubject() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.value = null;
-        _this.hasNext = false;
-        _this.hasCompleted = false;
-        return _this;
+        _super.apply(this, arguments);
+        this.value = null;
+        this.hasNext = false;
+        this.hasCompleted = false;
     }
     AsyncSubject.prototype._subscribe = function (subscriber) {
         if (this.hasError) {
@@ -1631,16 +1621,15 @@ var AsyncSubject = /** @class */ (function (_super) {
  * @extends {Ignored}
  * @hide true
  */
-var BoundCallbackObservable = /** @class */ (function (_super) {
+var BoundCallbackObservable = (function (_super) {
     __extends(BoundCallbackObservable, _super);
     function BoundCallbackObservable(callbackFunc, selector, args, context, scheduler) {
-        var _this = _super.call(this) || this;
-        _this.callbackFunc = callbackFunc;
-        _this.selector = selector;
-        _this.args = args;
-        _this.context = context;
-        _this.scheduler = scheduler;
-        return _this;
+        _super.call(this);
+        this.callbackFunc = callbackFunc;
+        this.selector = selector;
+        this.args = args;
+        this.context = context;
+        this.scheduler = scheduler;
     }
     /* tslint:enable:max-line-length */
     /**
@@ -1783,7 +1772,7 @@ var BoundCallbackObservable = /** @class */ (function (_super) {
         return function () {
             var args = [];
             for (var _i = 0; _i < arguments.length; _i++) {
-                args[_i] = arguments[_i];
+                args[_i - 0] = arguments[_i];
             }
             return new BoundCallbackObservable(func, selector, args, this, scheduler);
         };
@@ -1799,7 +1788,7 @@ var BoundCallbackObservable = /** @class */ (function (_super) {
                 var handler = function handlerFn() {
                     var innerArgs = [];
                     for (var _i = 0; _i < arguments.length; _i++) {
-                        innerArgs[_i] = arguments[_i];
+                        innerArgs[_i - 0] = arguments[_i];
                     }
                     var source = handlerFn.source;
                     var selector = source.selector, subject = source.subject;
@@ -1841,7 +1830,7 @@ var BoundCallbackObservable = /** @class */ (function (_super) {
             var handler = function handlerFn() {
                 var innerArgs = [];
                 for (var _i = 0; _i < arguments.length; _i++) {
-                    innerArgs[_i] = arguments[_i];
+                    innerArgs[_i - 0] = arguments[_i];
                 }
                 var source = handlerFn.source;
                 var selector = source.selector, subject = source.subject;
@@ -1889,16 +1878,15 @@ Observable.bindCallback = bindCallback;
  * @extends {Ignored}
  * @hide true
  */
-var BoundNodeCallbackObservable = /** @class */ (function (_super) {
+var BoundNodeCallbackObservable = (function (_super) {
     __extends(BoundNodeCallbackObservable, _super);
     function BoundNodeCallbackObservable(callbackFunc, selector, args, context, scheduler) {
-        var _this = _super.call(this) || this;
-        _this.callbackFunc = callbackFunc;
-        _this.selector = selector;
-        _this.args = args;
-        _this.context = context;
-        _this.scheduler = scheduler;
-        return _this;
+        _super.call(this);
+        this.callbackFunc = callbackFunc;
+        this.selector = selector;
+        this.args = args;
+        this.context = context;
+        this.scheduler = scheduler;
     }
     /* tslint:enable:max-line-length */
     /**
@@ -2031,7 +2019,7 @@ var BoundNodeCallbackObservable = /** @class */ (function (_super) {
         return function () {
             var args = [];
             for (var _i = 0; _i < arguments.length; _i++) {
-                args[_i] = arguments[_i];
+                args[_i - 0] = arguments[_i];
             }
             return new BoundNodeCallbackObservable(func, selector, args, this, scheduler);
         };
@@ -2047,7 +2035,7 @@ var BoundNodeCallbackObservable = /** @class */ (function (_super) {
                 var handler = function handlerFn() {
                     var innerArgs = [];
                     for (var _i = 0; _i < arguments.length; _i++) {
-                        innerArgs[_i] = arguments[_i];
+                        innerArgs[_i - 0] = arguments[_i];
                     }
                     var source = handlerFn.source;
                     var selector = source.selector, subject = source.subject;
@@ -2096,7 +2084,7 @@ function dispatch(state) {
         var handler = function handlerFn() {
             var innerArgs = [];
             for (var _i = 0; _i < arguments.length; _i++) {
-                innerArgs[_i] = arguments[_i];
+                innerArgs[_i - 0] = arguments[_i];
             }
             var source = handlerFn.source;
             var selector = source.selector, subject = source.subject;
@@ -2150,17 +2138,16 @@ function isScheduler(value) {
  * @extends {Ignored}
  * @hide true
  */
-var ScalarObservable = /** @class */ (function (_super) {
+var ScalarObservable = (function (_super) {
     __extends(ScalarObservable, _super);
     function ScalarObservable(value, scheduler) {
-        var _this = _super.call(this) || this;
-        _this.value = value;
-        _this.scheduler = scheduler;
-        _this._isScalar = true;
+        _super.call(this);
+        this.value = value;
+        this.scheduler = scheduler;
+        this._isScalar = true;
         if (scheduler) {
-            _this._isScalar = false;
+            this._isScalar = false;
         }
-        return _this;
     }
     ScalarObservable.create = function (value, scheduler) {
         return new ScalarObservable(value, scheduler);
@@ -2201,12 +2188,11 @@ var ScalarObservable = /** @class */ (function (_super) {
  * @extends {Ignored}
  * @hide true
  */
-var EmptyObservable = /** @class */ (function (_super) {
+var EmptyObservable = (function (_super) {
     __extends(EmptyObservable, _super);
     function EmptyObservable(scheduler) {
-        var _this = _super.call(this) || this;
-        _this.scheduler = scheduler;
-        return _this;
+        _super.call(this);
+        this.scheduler = scheduler;
     }
     /**
      * Creates an Observable that emits no items to the Observer and immediately
@@ -2275,17 +2261,16 @@ var EmptyObservable = /** @class */ (function (_super) {
  * @extends {Ignored}
  * @hide true
  */
-var ArrayObservable = /** @class */ (function (_super) {
+var ArrayObservable = (function (_super) {
     __extends(ArrayObservable, _super);
     function ArrayObservable(array, scheduler) {
-        var _this = _super.call(this) || this;
-        _this.array = array;
-        _this.scheduler = scheduler;
+        _super.call(this);
+        this.array = array;
+        this.scheduler = scheduler;
         if (!scheduler && array.length === 1) {
-            _this._isScalar = true;
-            _this.value = array[0];
+            this._isScalar = true;
+            this.value = array[0];
         }
-        return _this;
     }
     ArrayObservable.create = function (array, scheduler) {
         return new ArrayObservable(array, scheduler);
@@ -2329,7 +2314,7 @@ var ArrayObservable = /** @class */ (function (_super) {
     ArrayObservable.of = function () {
         var array = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            array[_i] = arguments[_i];
+            array[_i - 0] = arguments[_i];
         }
         var scheduler = array[array.length - 1];
         if (isScheduler(scheduler)) {
@@ -2387,10 +2372,10 @@ var ArrayObservable = /** @class */ (function (_super) {
  * @ignore
  * @extends {Ignored}
  */
-var OuterSubscriber = /** @class */ (function (_super) {
+var OuterSubscriber = (function (_super) {
     __extends(OuterSubscriber, _super);
     function OuterSubscriber() {
-        return _super !== null && _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     OuterSubscriber.prototype.notifyNext = function (outerValue, innerValue, outerIndex, innerIndex, innerSub) {
         this.destination.next(innerValue);
@@ -2449,15 +2434,14 @@ var iterator = symbolIteratorPonyfill(_root);
  * @ignore
  * @extends {Ignored}
  */
-var InnerSubscriber = /** @class */ (function (_super) {
+var InnerSubscriber = (function (_super) {
     __extends(InnerSubscriber, _super);
     function InnerSubscriber(parent, outerValue, outerIndex) {
-        var _this = _super.call(this) || this;
-        _this.parent = parent;
-        _this.outerValue = outerValue;
-        _this.outerIndex = outerIndex;
-        _this.index = 0;
-        return _this;
+        _super.call(this);
+        this.parent = parent;
+        this.outerValue = outerValue;
+        this.outerIndex = outerIndex;
+        this.index = 0;
     }
     InnerSubscriber.prototype._next = function (value) {
         this.parent.notifyNext(this.outerValue, value, this.outerIndex, this.index++, this);
@@ -2535,7 +2519,7 @@ function subscribeToResult(outerSubscriber, result, outerValue, outerIndex) {
     }
     else {
         var value = isObject(result) ? 'an invalid object' : "'" + result + "'";
-        var msg = "You provided " + value + " where a stream was expected."
+        var msg = ("You provided " + value + " where a stream was expected.")
             + ' You can provide an Observable, Promise, Array, or Iterable.';
         destination.error(new TypeError(msg));
     }
@@ -2590,7 +2574,7 @@ var none = {};
 function combineLatest$1() {
     var observables = [];
     for (var _i = 0; _i < arguments.length; _i++) {
-        observables[_i] = arguments[_i];
+        observables[_i - 0] = arguments[_i];
     }
     var project = null;
     if (typeof observables[observables.length - 1] === 'function') {
@@ -2603,7 +2587,7 @@ function combineLatest$1() {
     }
     return function (source) { return source.lift.call(new ArrayObservable([source].concat(observables)), new CombineLatestOperator(project)); };
 }
-var CombineLatestOperator = /** @class */ (function () {
+var CombineLatestOperator = (function () {
     function CombineLatestOperator(project) {
         this.project = project;
     }
@@ -2617,15 +2601,14 @@ var CombineLatestOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var CombineLatestSubscriber = /** @class */ (function (_super) {
+var CombineLatestSubscriber = (function (_super) {
     __extends(CombineLatestSubscriber, _super);
     function CombineLatestSubscriber(destination, project) {
-        var _this = _super.call(this, destination) || this;
-        _this.project = project;
-        _this.active = 0;
-        _this.values = [];
-        _this.observables = [];
-        return _this;
+        _super.call(this, destination);
+        this.project = project;
+        this.active = 0;
+        this.values = [];
+        this.observables = [];
     }
     CombineLatestSubscriber.prototype._next = function (observable) {
         this.values.push(none);
@@ -2793,7 +2776,7 @@ var CombineLatestSubscriber = /** @class */ (function (_super) {
 function combineLatest$$1() {
     var observables = [];
     for (var _i = 0; _i < arguments.length; _i++) {
-        observables[_i] = arguments[_i];
+        observables[_i - 0] = arguments[_i];
     }
     var project = null;
     var scheduler = null;
@@ -2820,13 +2803,12 @@ var of = ArrayObservable.of;
  * @extends {Ignored}
  * @hide true
  */
-var PromiseObservable = /** @class */ (function (_super) {
+var PromiseObservable = (function (_super) {
     __extends(PromiseObservable, _super);
     function PromiseObservable(promise, scheduler) {
-        var _this = _super.call(this) || this;
-        _this.promise = promise;
-        _this.scheduler = scheduler;
-        return _this;
+        _super.call(this);
+        this.promise = promise;
+        this.scheduler = scheduler;
     }
     /**
      * Converts a Promise to an Observable.
@@ -2933,16 +2915,15 @@ function dispatchError$2(arg) {
  * @extends {Ignored}
  * @hide true
  */
-var IteratorObservable = /** @class */ (function (_super) {
+var IteratorObservable = (function (_super) {
     __extends(IteratorObservable, _super);
     function IteratorObservable(iterator$$1, scheduler) {
-        var _this = _super.call(this) || this;
-        _this.scheduler = scheduler;
+        _super.call(this);
+        this.scheduler = scheduler;
         if (iterator$$1 == null) {
             throw new Error('iterator cannot be null.');
         }
-        _this.iterator = getIterator(iterator$$1);
-        return _this;
+        this.iterator = getIterator(iterator$$1);
     }
     IteratorObservable.create = function (iterator$$1, scheduler) {
         return new IteratorObservable(iterator$$1, scheduler);
@@ -2997,7 +2978,7 @@ var IteratorObservable = /** @class */ (function (_super) {
     };
     return IteratorObservable;
 }(Observable));
-var StringIterator = /** @class */ (function () {
+var StringIterator = (function () {
     function StringIterator(str, idx, len) {
         if (idx === void 0) { idx = 0; }
         if (len === void 0) { len = str.length; }
@@ -3017,7 +2998,7 @@ var StringIterator = /** @class */ (function () {
     };
     return StringIterator;
 }());
-var ArrayIterator = /** @class */ (function () {
+var ArrayIterator = (function () {
     function ArrayIterator(arr, idx, len) {
         if (idx === void 0) { idx = 0; }
         if (len === void 0) { len = toLength(arr); }
@@ -3087,17 +3068,16 @@ function sign(value) {
  * @extends {Ignored}
  * @hide true
  */
-var ArrayLikeObservable = /** @class */ (function (_super) {
+var ArrayLikeObservable = (function (_super) {
     __extends(ArrayLikeObservable, _super);
     function ArrayLikeObservable(arrayLike, scheduler) {
-        var _this = _super.call(this) || this;
-        _this.arrayLike = arrayLike;
-        _this.scheduler = scheduler;
+        _super.call(this);
+        this.arrayLike = arrayLike;
+        this.scheduler = scheduler;
         if (!scheduler && arrayLike.length === 1) {
-            _this._isScalar = true;
-            _this.value = arrayLike[0];
+            this._isScalar = true;
+            this.value = arrayLike[0];
         }
-        return _this;
     }
     ArrayLikeObservable.create = function (arrayLike, scheduler) {
         var length = arrayLike.length;
@@ -3157,7 +3137,7 @@ var ArrayLikeObservable = /** @class */ (function (_super) {
  *
  * @class Notification<T>
  */
-var Notification = /** @class */ (function () {
+var Notification = (function () {
     function Notification(kind, value, error) {
         this.kind = kind;
         this.value = value;
@@ -3319,7 +3299,7 @@ function observeOn(scheduler, delay) {
         return source.lift(new ObserveOnOperator(scheduler, delay));
     };
 }
-var ObserveOnOperator = /** @class */ (function () {
+var ObserveOnOperator = (function () {
     function ObserveOnOperator(scheduler, delay) {
         if (delay === void 0) { delay = 0; }
         this.scheduler = scheduler;
@@ -3335,14 +3315,13 @@ var ObserveOnOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var ObserveOnSubscriber = /** @class */ (function (_super) {
+var ObserveOnSubscriber = (function (_super) {
     __extends(ObserveOnSubscriber, _super);
     function ObserveOnSubscriber(destination, scheduler, delay) {
         if (delay === void 0) { delay = 0; }
-        var _this = _super.call(this, destination) || this;
-        _this.scheduler = scheduler;
-        _this.delay = delay;
-        return _this;
+        _super.call(this, destination);
+        this.scheduler = scheduler;
+        this.delay = delay;
     }
     ObserveOnSubscriber.dispatch = function (arg) {
         var notification = arg.notification, destination = arg.destination;
@@ -3363,7 +3342,7 @@ var ObserveOnSubscriber = /** @class */ (function (_super) {
     };
     return ObserveOnSubscriber;
 }(Subscriber));
-var ObserveOnMessage = /** @class */ (function () {
+var ObserveOnMessage = (function () {
     function ObserveOnMessage(notification, destination) {
         this.notification = notification;
         this.destination = destination;
@@ -3376,13 +3355,12 @@ var ObserveOnMessage = /** @class */ (function () {
  * @extends {Ignored}
  * @hide true
  */
-var FromObservable = /** @class */ (function (_super) {
+var FromObservable = (function (_super) {
     __extends(FromObservable, _super);
     function FromObservable(ish, scheduler) {
-        var _this = _super.call(this, null) || this;
-        _this.ish = ish;
-        _this.scheduler = scheduler;
-        return _this;
+        _super.call(this, null);
+        this.ish = ish;
+        this.scheduler = scheduler;
     }
     /**
      * Creates an Observable from an Array, an array-like object, a Promise, an
@@ -3547,7 +3525,7 @@ function mergeMap(project, resultSelector, concurrent) {
         return source.lift(new MergeMapOperator(project, resultSelector, concurrent));
     };
 }
-var MergeMapOperator = /** @class */ (function () {
+var MergeMapOperator = (function () {
     function MergeMapOperator(project, resultSelector, concurrent) {
         if (concurrent === void 0) { concurrent = Number.POSITIVE_INFINITY; }
         this.project = project;
@@ -3564,19 +3542,18 @@ var MergeMapOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var MergeMapSubscriber = /** @class */ (function (_super) {
+var MergeMapSubscriber = (function (_super) {
     __extends(MergeMapSubscriber, _super);
     function MergeMapSubscriber(destination, project, resultSelector, concurrent) {
         if (concurrent === void 0) { concurrent = Number.POSITIVE_INFINITY; }
-        var _this = _super.call(this, destination) || this;
-        _this.project = project;
-        _this.resultSelector = resultSelector;
-        _this.concurrent = concurrent;
-        _this.hasCompleted = false;
-        _this.buffer = [];
-        _this.active = 0;
-        _this.index = 0;
-        return _this;
+        _super.call(this, destination);
+        this.project = project;
+        this.resultSelector = resultSelector;
+        this.concurrent = concurrent;
+        this.hasCompleted = false;
+        this.buffer = [];
+        this.active = 0;
+        this.index = 0;
     }
     MergeMapSubscriber.prototype._next = function (value) {
         if (this.active < this.concurrent) {
@@ -3843,7 +3820,7 @@ function concatAll() {
 function concat() {
     var observables = [];
     for (var _i = 0; _i < arguments.length; _i++) {
-        observables[_i] = arguments[_i];
+        observables[_i - 0] = arguments[_i];
     }
     if (observables.length === 1 || (observables.length === 2 && isScheduler(observables[1]))) {
         return from(observables[0]);
@@ -3858,12 +3835,11 @@ Observable.concat = concat;
  * @extends {Ignored}
  * @hide true
  */
-var DeferObservable = /** @class */ (function (_super) {
+var DeferObservable = (function (_super) {
     __extends(DeferObservable, _super);
     function DeferObservable(observableFactory) {
-        var _this = _super.call(this) || this;
-        _this.observableFactory = observableFactory;
-        return _this;
+        _super.call(this);
+        this.observableFactory = observableFactory;
     }
     /**
      * Creates an Observable that, on subscribe, calls an Observable factory to
@@ -3919,13 +3895,12 @@ var DeferObservable = /** @class */ (function (_super) {
     };
     return DeferObservable;
 }(Observable));
-var DeferSubscriber = /** @class */ (function (_super) {
+var DeferSubscriber = (function (_super) {
     __extends(DeferSubscriber, _super);
     function DeferSubscriber(destination, factory) {
-        var _this = _super.call(this, destination) || this;
-        _this.factory = factory;
-        _this.tryDefer();
-        return _this;
+        _super.call(this, destination);
+        this.factory = factory;
+        this.tryDefer();
     }
     DeferSubscriber.prototype.tryDefer = function () {
         try {
@@ -3957,13 +3932,12 @@ Observable.empty = empty$1;
  * @extends {Ignored}
  * @hide true
  */
-var ForkJoinObservable = /** @class */ (function (_super) {
+var ForkJoinObservable = (function (_super) {
     __extends(ForkJoinObservable, _super);
     function ForkJoinObservable(sources, resultSelector) {
-        var _this = _super.call(this) || this;
-        _this.sources = sources;
-        _this.resultSelector = resultSelector;
-        return _this;
+        _super.call(this);
+        this.sources = sources;
+        this.resultSelector = resultSelector;
     }
     /* tslint:enable:max-line-length */
     /**
@@ -4066,7 +4040,7 @@ var ForkJoinObservable = /** @class */ (function (_super) {
     ForkJoinObservable.create = function () {
         var sources = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            sources[_i] = arguments[_i];
+            sources[_i - 0] = arguments[_i];
         }
         if (sources === null || arguments.length === 0) {
             return new EmptyObservable();
@@ -4095,26 +4069,25 @@ var ForkJoinObservable = /** @class */ (function (_super) {
  * @ignore
  * @extends {Ignored}
  */
-var ForkJoinSubscriber = /** @class */ (function (_super) {
+var ForkJoinSubscriber = (function (_super) {
     __extends(ForkJoinSubscriber, _super);
     function ForkJoinSubscriber(destination, sources, resultSelector) {
-        var _this = _super.call(this, destination) || this;
-        _this.sources = sources;
-        _this.resultSelector = resultSelector;
-        _this.completed = 0;
-        _this.haveValues = 0;
+        _super.call(this, destination);
+        this.sources = sources;
+        this.resultSelector = resultSelector;
+        this.completed = 0;
+        this.haveValues = 0;
         var len = sources.length;
-        _this.total = len;
-        _this.values = new Array(len);
+        this.total = len;
+        this.values = new Array(len);
         for (var i = 0; i < len; i++) {
             var source = sources[i];
-            var innerSubscription = subscribeToResult(_this, source, null, i);
+            var innerSubscription = subscribeToResult(this, source, null, i);
             if (innerSubscription) {
                 innerSubscription.outerIndex = i;
-                _this.add(innerSubscription);
+                this.add(innerSubscription);
             }
         }
-        return _this;
     }
     ForkJoinSubscriber.prototype.notifyNext = function (outerValue, innerValue, outerIndex, innerIndex, innerSub) {
         this.values[outerIndex] = innerValue;
@@ -4171,15 +4144,14 @@ function isEventTarget(sourceObj) {
  * @extends {Ignored}
  * @hide true
  */
-var FromEventObservable = /** @class */ (function (_super) {
+var FromEventObservable = (function (_super) {
     __extends(FromEventObservable, _super);
     function FromEventObservable(sourceObj, eventName, selector, options) {
-        var _this = _super.call(this) || this;
-        _this.sourceObj = sourceObj;
-        _this.eventName = eventName;
-        _this.selector = selector;
-        _this.options = options;
-        return _this;
+        _super.call(this);
+        this.sourceObj = sourceObj;
+        this.eventName = eventName;
+        this.selector = selector;
+        this.options = options;
     }
     /* tslint:enable:max-line-length */
     /**
@@ -4340,7 +4312,7 @@ var FromEventObservable = /** @class */ (function (_super) {
         var handler = selector ? function () {
             var args = [];
             for (var _i = 0; _i < arguments.length; _i++) {
-                args[_i] = arguments[_i];
+                args[_i - 0] = arguments[_i];
             }
             var result = tryCatch(selector).apply(void 0, args);
             if (result === errorObject) {
@@ -4364,14 +4336,13 @@ Observable.fromEvent = fromEvent;
  * @extends {Ignored}
  * @hide true
  */
-var FromEventPatternObservable = /** @class */ (function (_super) {
+var FromEventPatternObservable = (function (_super) {
     __extends(FromEventPatternObservable, _super);
     function FromEventPatternObservable(addHandler, removeHandler, selector) {
-        var _this = _super.call(this) || this;
-        _this.addHandler = addHandler;
-        _this.removeHandler = removeHandler;
-        _this.selector = selector;
-        return _this;
+        _super.call(this);
+        this.addHandler = addHandler;
+        this.removeHandler = removeHandler;
+        this.selector = selector;
     }
     /**
      * Creates an Observable from an API based on addHandler/removeHandler
@@ -4430,7 +4401,7 @@ var FromEventPatternObservable = /** @class */ (function (_super) {
         var handler = !!this.selector ? function () {
             var args = [];
             for (var _i = 0; _i < arguments.length; _i++) {
-                args[_i] = arguments[_i];
+                args[_i - 0] = arguments[_i];
             }
             _this._callSelector(subscriber, args);
         } : function (e) { subscriber.next(e); };
@@ -4477,16 +4448,15 @@ var selfSelector = function (value) { return value; };
  * @extends {Ignored}
  * @hide true
  */
-var GenerateObservable = /** @class */ (function (_super) {
+var GenerateObservable = (function (_super) {
     __extends(GenerateObservable, _super);
     function GenerateObservable(initialState, condition, iterate, resultSelector, scheduler) {
-        var _this = _super.call(this) || this;
-        _this.initialState = initialState;
-        _this.condition = condition;
-        _this.iterate = iterate;
-        _this.resultSelector = resultSelector;
-        _this.scheduler = scheduler;
-        return _this;
+        _super.call(this);
+        this.initialState = initialState;
+        this.condition = condition;
+        this.iterate = iterate;
+        this.resultSelector = resultSelector;
+        this.scheduler = scheduler;
     }
     GenerateObservable.create = function (initialStateOrOptions, condition, iterate, resultSelectorOrObservable, scheduler) {
         if (arguments.length == 1) {
@@ -4505,8 +4475,7 @@ var GenerateObservable = /** @class */ (function (_super) {
                 iterate: this.iterate,
                 condition: this.condition,
                 resultSelector: this.resultSelector,
-                state: state
-            });
+                state: state });
         }
         var _a = this, condition = _a.condition, resultSelector = _a.resultSelector, iterate = _a.iterate;
         do {
@@ -4608,14 +4577,13 @@ Observable.generate = generate;
  * @extends {Ignored}
  * @hide true
  */
-var IfObservable = /** @class */ (function (_super) {
+var IfObservable = (function (_super) {
     __extends(IfObservable, _super);
     function IfObservable(condition, thenSource, elseSource) {
-        var _this = _super.call(this) || this;
-        _this.condition = condition;
-        _this.thenSource = thenSource;
-        _this.elseSource = elseSource;
-        return _this;
+        _super.call(this);
+        this.condition = condition;
+        this.thenSource = thenSource;
+        this.elseSource = elseSource;
     }
     IfObservable.create = function (condition, thenSource, elseSource) {
         return new IfObservable(condition, thenSource, elseSource);
@@ -4626,15 +4594,14 @@ var IfObservable = /** @class */ (function (_super) {
     };
     return IfObservable;
 }(Observable));
-var IfSubscriber = /** @class */ (function (_super) {
+var IfSubscriber = (function (_super) {
     __extends(IfSubscriber, _super);
     function IfSubscriber(destination, condition, thenSource, elseSource) {
-        var _this = _super.call(this, destination) || this;
-        _this.condition = condition;
-        _this.thenSource = thenSource;
-        _this.elseSource = elseSource;
-        _this.tryIf();
-        return _this;
+        _super.call(this, destination);
+        this.condition = condition;
+        this.thenSource = thenSource;
+        this.elseSource = elseSource;
+        this.tryIf();
     }
     IfSubscriber.prototype.tryIf = function () {
         var _a = this, condition = _a.condition, thenSource = _a.thenSource, elseSource = _a.elseSource;
@@ -4682,10 +4649,10 @@ function isNumeric(val) {
  *
  * @class Action<T>
  */
-var Action = /** @class */ (function (_super) {
+var Action = (function (_super) {
     __extends(Action, _super);
     function Action(scheduler, work) {
-        return _super.call(this) || this;
+        _super.call(this);
     }
     /**
      * Schedules this action on its parent Scheduler for execution. May be passed
@@ -4709,14 +4676,13 @@ var Action = /** @class */ (function (_super) {
  * @ignore
  * @extends {Ignored}
  */
-var AsyncAction = /** @class */ (function (_super) {
+var AsyncAction = (function (_super) {
     __extends(AsyncAction, _super);
     function AsyncAction(scheduler, work) {
-        var _this = _super.call(this, scheduler, work) || this;
-        _this.scheduler = scheduler;
-        _this.work = work;
-        _this.pending = false;
-        return _this;
+        _super.call(this, scheduler, work);
+        this.scheduler = scheduler;
+        this.work = work;
+        this.pending = false;
     }
     AsyncAction.prototype.schedule = function (state, delay) {
         if (delay === void 0) { delay = 0; }
@@ -4725,6 +4691,9 @@ var AsyncAction = /** @class */ (function (_super) {
         }
         // Always replace the current state with the new state.
         this.state = state;
+        // Set the pending flag indicating that this action has been scheduled, or
+        // has recursively rescheduled itself.
+        this.pending = true;
         var id = this.id;
         var scheduler = this.scheduler;
         //
@@ -4751,9 +4720,6 @@ var AsyncAction = /** @class */ (function (_super) {
         if (id != null) {
             this.id = this.recycleAsyncId(scheduler, id, delay);
         }
-        // Set the pending flag indicating that this action has been scheduled, or
-        // has recursively rescheduled itself.
-        this.pending = true;
         this.delay = delay;
         // If this action has already an async Id, don't request a new one.
         this.id = this.id || this.requestAsyncId(scheduler, this.id, delay);
@@ -4854,7 +4820,7 @@ var AsyncAction = /** @class */ (function (_super) {
  *
  * @class Scheduler
  */
-var Scheduler$1 = /** @class */ (function () {
+var Scheduler$1 = (function () {
     function Scheduler(SchedulerAction, now) {
         if (now === void 0) { now = Scheduler.now; }
         this.SchedulerAction = SchedulerAction;
@@ -4885,25 +4851,24 @@ var Scheduler$1 = /** @class */ (function () {
     return Scheduler;
 }());
 
-var AsyncScheduler = /** @class */ (function (_super) {
+var AsyncScheduler = (function (_super) {
     __extends(AsyncScheduler, _super);
     function AsyncScheduler() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.actions = [];
+        _super.apply(this, arguments);
+        this.actions = [];
         /**
          * A flag to indicate whether the Scheduler is currently executing a batch of
          * queued actions.
          * @type {boolean}
          */
-        _this.active = false;
+        this.active = false;
         /**
          * An internal ID used to track the latest asynchronous task such as those
          * coming from `setTimeout`, `setInterval`, `requestAnimationFrame`, and
          * others.
          * @type {any}
          */
-        _this.scheduled = undefined;
-        return _this;
+        this.scheduled = undefined;
     }
     AsyncScheduler.prototype.flush = function (action) {
         var actions = this.actions;
@@ -4978,21 +4943,20 @@ var async = new AsyncScheduler(AsyncAction);
  * @extends {Ignored}
  * @hide true
  */
-var IntervalObservable = /** @class */ (function (_super) {
+var IntervalObservable = (function (_super) {
     __extends(IntervalObservable, _super);
     function IntervalObservable(period, scheduler) {
         if (period === void 0) { period = 0; }
         if (scheduler === void 0) { scheduler = async; }
-        var _this = _super.call(this) || this;
-        _this.period = period;
-        _this.scheduler = scheduler;
+        _super.call(this);
+        this.period = period;
+        this.scheduler = scheduler;
         if (!isNumeric(period) || period < 0) {
-            _this.period = 0;
+            this.period = 0;
         }
         if (!scheduler || typeof scheduler.schedule !== 'function') {
-            _this.scheduler = async;
+            this.scheduler = async;
         }
-        return _this;
     }
     /**
      * Creates an Observable that emits sequential numbers every specified
@@ -5120,7 +5084,7 @@ Observable.interval = interval;
 function merge() {
     var observables = [];
     for (var _i = 0; _i < arguments.length; _i++) {
-        observables[_i] = arguments[_i];
+        observables[_i - 0] = arguments[_i];
     }
     var concurrent = Number.POSITIVE_INFINITY;
     var scheduler = null;
@@ -5145,7 +5109,7 @@ Observable.merge = merge;
 function race() {
     var observables = [];
     for (var _i = 0; _i < arguments.length; _i++) {
-        observables[_i] = arguments[_i];
+        observables[_i - 0] = arguments[_i];
     }
     // if the only argument is an array, it was most likely called with
     // `race([obs1, obs2, ...])`
@@ -5159,7 +5123,7 @@ function race() {
     }
     return new ArrayObservable(observables).lift(new RaceOperator());
 }
-var RaceOperator = /** @class */ (function () {
+var RaceOperator = (function () {
     function RaceOperator() {
     }
     RaceOperator.prototype.call = function (subscriber, source) {
@@ -5172,14 +5136,13 @@ var RaceOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var RaceSubscriber = /** @class */ (function (_super) {
+var RaceSubscriber = (function (_super) {
     __extends(RaceSubscriber, _super);
     function RaceSubscriber(destination) {
-        var _this = _super.call(this, destination) || this;
-        _this.hasFirst = false;
-        _this.observables = [];
-        _this.subscriptions = [];
-        return _this;
+        _super.call(this, destination);
+        this.hasFirst = false;
+        this.observables = [];
+        this.subscriptions = [];
     }
     RaceSubscriber.prototype._next = function (observable) {
         this.observables.push(observable);
@@ -5226,10 +5189,10 @@ Observable.race = race;
  * @extends {Ignored}
  * @hide true
  */
-var NeverObservable = /** @class */ (function (_super) {
+var NeverObservable = (function (_super) {
     __extends(NeverObservable, _super);
     function NeverObservable() {
-        return _super.call(this) || this;
+        _super.call(this);
     }
     /**
      * Creates an Observable that emits no items to the Observer.
@@ -5342,7 +5305,7 @@ Observable.of = of;
 function onErrorResumeNext$1() {
     var nextSources = [];
     for (var _i = 0; _i < arguments.length; _i++) {
-        nextSources[_i] = arguments[_i];
+        nextSources[_i - 0] = arguments[_i];
     }
     if (nextSources.length === 1 && isArray(nextSources[0])) {
         nextSources = nextSources[0];
@@ -5353,7 +5316,7 @@ function onErrorResumeNext$1() {
 function onErrorResumeNextStatic() {
     var nextSources = [];
     for (var _i = 0; _i < arguments.length; _i++) {
-        nextSources[_i] = arguments[_i];
+        nextSources[_i - 0] = arguments[_i];
     }
     var source = null;
     if (nextSources.length === 1 && isArray(nextSources[0])) {
@@ -5362,7 +5325,7 @@ function onErrorResumeNextStatic() {
     source = nextSources.shift();
     return new FromObservable(source, null).lift(new OnErrorResumeNextOperator(nextSources));
 }
-var OnErrorResumeNextOperator = /** @class */ (function () {
+var OnErrorResumeNextOperator = (function () {
     function OnErrorResumeNextOperator(nextSources) {
         this.nextSources = nextSources;
     }
@@ -5371,13 +5334,12 @@ var OnErrorResumeNextOperator = /** @class */ (function () {
     };
     return OnErrorResumeNextOperator;
 }());
-var OnErrorResumeNextSubscriber = /** @class */ (function (_super) {
+var OnErrorResumeNextSubscriber = (function (_super) {
     __extends(OnErrorResumeNextSubscriber, _super);
     function OnErrorResumeNextSubscriber(destination, nextSources) {
-        var _this = _super.call(this, destination) || this;
-        _this.destination = destination;
-        _this.nextSources = nextSources;
-        return _this;
+        _super.call(this, destination);
+        this.destination = destination;
+        this.nextSources = nextSources;
     }
     OnErrorResumeNextSubscriber.prototype.notifyError = function (error, innerSub) {
         this.subscribeToNextSource();
@@ -5423,14 +5385,13 @@ function dispatch$1(state) {
  * @extends {Ignored}
  * @hide true
  */
-var PairsObservable = /** @class */ (function (_super) {
+var PairsObservable = (function (_super) {
     __extends(PairsObservable, _super);
     function PairsObservable(obj, scheduler) {
-        var _this = _super.call(this) || this;
-        _this.obj = obj;
-        _this.scheduler = scheduler;
-        _this.keys = Object.keys(obj);
-        return _this;
+        _super.call(this);
+        this.obj = obj;
+        this.scheduler = scheduler;
+        this.keys = Object.keys(obj);
     }
     /**
      * Convert an object into an observable sequence of [key, value] pairs
@@ -5494,14 +5455,13 @@ Observable.pairs = pairs;
  * @extends {Ignored}
  * @hide true
  */
-var RangeObservable = /** @class */ (function (_super) {
+var RangeObservable = (function (_super) {
     __extends(RangeObservable, _super);
     function RangeObservable(start, count, scheduler) {
-        var _this = _super.call(this) || this;
-        _this.start = start;
-        _this._count = count;
-        _this.scheduler = scheduler;
-        return _this;
+        _super.call(this);
+        this.start = start;
+        this._count = count;
+        this.scheduler = scheduler;
     }
     /**
      * Creates an Observable that emits a sequence of numbers within a specified
@@ -5587,13 +5547,12 @@ Observable.range = range;
  * @extends {Ignored}
  * @hide true
  */
-var UsingObservable = /** @class */ (function (_super) {
+var UsingObservable = (function (_super) {
     __extends(UsingObservable, _super);
     function UsingObservable(resourceFactory, observableFactory) {
-        var _this = _super.call(this) || this;
-        _this.resourceFactory = resourceFactory;
-        _this.observableFactory = observableFactory;
-        return _this;
+        _super.call(this);
+        this.resourceFactory = resourceFactory;
+        this.observableFactory = observableFactory;
     }
     UsingObservable.create = function (resourceFactory, observableFactory) {
         return new UsingObservable(resourceFactory, observableFactory);
@@ -5611,15 +5570,14 @@ var UsingObservable = /** @class */ (function (_super) {
     };
     return UsingObservable;
 }(Observable));
-var UsingSubscriber = /** @class */ (function (_super) {
+var UsingSubscriber = (function (_super) {
     __extends(UsingSubscriber, _super);
     function UsingSubscriber(destination, resource, observableFactory) {
-        var _this = _super.call(this, destination) || this;
-        _this.resource = resource;
-        _this.observableFactory = observableFactory;
+        _super.call(this, destination);
+        this.resource = resource;
+        this.observableFactory = observableFactory;
         destination.add(resource);
-        _this.tryUse();
-        return _this;
+        this.tryUse();
     }
     UsingSubscriber.prototype.tryUse = function () {
         try {
@@ -5644,13 +5602,12 @@ Observable.using = using;
  * @extends {Ignored}
  * @hide true
  */
-var ErrorObservable = /** @class */ (function (_super) {
+var ErrorObservable = (function (_super) {
     __extends(ErrorObservable, _super);
     function ErrorObservable(error, scheduler) {
-        var _this = _super.call(this) || this;
-        _this.error = error;
-        _this.scheduler = scheduler;
-        return _this;
+        _super.call(this);
+        this.error = error;
+        this.scheduler = scheduler;
     }
     /**
      * Creates an Observable that emits no items to the Observer and immediately
@@ -5728,15 +5685,15 @@ function isDate(value) {
  * @extends {Ignored}
  * @hide true
  */
-var TimerObservable = /** @class */ (function (_super) {
+var TimerObservable = (function (_super) {
     __extends(TimerObservable, _super);
     function TimerObservable(dueTime, period, scheduler) {
         if (dueTime === void 0) { dueTime = 0; }
-        var _this = _super.call(this) || this;
-        _this.period = -1;
-        _this.dueTime = 0;
+        _super.call(this);
+        this.period = -1;
+        this.dueTime = 0;
         if (isNumeric(period)) {
-            _this.period = Number(period) < 1 && 1 || Number(period);
+            this.period = Number(period) < 1 && 1 || Number(period);
         }
         else if (isScheduler(period)) {
             scheduler = period;
@@ -5744,11 +5701,10 @@ var TimerObservable = /** @class */ (function (_super) {
         if (!isScheduler(scheduler)) {
             scheduler = async;
         }
-        _this.scheduler = scheduler;
-        _this.dueTime = isDate(dueTime) ?
-            (+dueTime - _this.scheduler.now()) :
+        this.scheduler = scheduler;
+        this.dueTime = isDate(dueTime) ?
+            (+dueTime - this.scheduler.now()) :
             dueTime;
-        return _this;
     }
     /**
      * Creates an Observable that starts emitting after an `initialDelay` and
@@ -5833,7 +5789,7 @@ Observable.timer = timer;
 function zip$1() {
     var observables = [];
     for (var _i = 0; _i < arguments.length; _i++) {
-        observables[_i] = arguments[_i];
+        observables[_i - 0] = arguments[_i];
     }
     return function zipOperatorFunction(source) {
         return source.lift.call(zipStatic.apply(void 0, [source].concat(observables)));
@@ -5874,7 +5830,7 @@ function zip$1() {
 function zipStatic() {
     var observables = [];
     for (var _i = 0; _i < arguments.length; _i++) {
-        observables[_i] = arguments[_i];
+        observables[_i - 0] = arguments[_i];
     }
     var project = observables[observables.length - 1];
     if (typeof project === 'function') {
@@ -5882,7 +5838,7 @@ function zipStatic() {
     }
     return new ArrayObservable(observables).lift(new ZipOperator(project));
 }
-var ZipOperator = /** @class */ (function () {
+var ZipOperator = (function () {
     function ZipOperator(project) {
         this.project = project;
     }
@@ -5896,16 +5852,15 @@ var ZipOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var ZipSubscriber = /** @class */ (function (_super) {
+var ZipSubscriber = (function (_super) {
     __extends(ZipSubscriber, _super);
     function ZipSubscriber(destination, project, values) {
         if (values === void 0) { values = Object.create(null); }
-        var _this = _super.call(this, destination) || this;
-        _this.iterators = [];
-        _this.active = 0;
-        _this.project = (typeof project === 'function') ? project : null;
-        _this.values = values;
-        return _this;
+        _super.call(this, destination);
+        this.iterators = [];
+        this.active = 0;
+        this.project = (typeof project === 'function') ? project : null;
+        this.values = values;
     }
     ZipSubscriber.prototype._next = function (value) {
         var iterators = this.iterators;
@@ -5993,7 +5948,7 @@ var ZipSubscriber = /** @class */ (function (_super) {
     };
     return ZipSubscriber;
 }(Subscriber));
-var StaticIterator = /** @class */ (function () {
+var StaticIterator = (function () {
     function StaticIterator(iterator$$1) {
         this.iterator = iterator$$1;
         this.nextResult = iterator$$1.next();
@@ -6012,7 +5967,7 @@ var StaticIterator = /** @class */ (function () {
     };
     return StaticIterator;
 }());
-var StaticArrayIterator = /** @class */ (function () {
+var StaticArrayIterator = (function () {
     function StaticArrayIterator(array) {
         this.array = array;
         this.index = 0;
@@ -6040,16 +5995,15 @@ var StaticArrayIterator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var ZipBufferIterator = /** @class */ (function (_super) {
+var ZipBufferIterator = (function (_super) {
     __extends(ZipBufferIterator, _super);
     function ZipBufferIterator(destination, parent, observable) {
-        var _this = _super.call(this, destination) || this;
-        _this.parent = parent;
-        _this.observable = observable;
-        _this.stillUnsubscribed = true;
-        _this.buffer = [];
-        _this.isComplete = false;
-        return _this;
+        _super.call(this, destination);
+        this.parent = parent;
+        this.observable = observable;
+        this.stillUnsubscribed = true;
+        this.buffer = [];
+        this.isComplete = false;
     }
     ZipBufferIterator.prototype[iterator] = function () {
         return this;
@@ -6135,7 +6089,7 @@ function map(project, thisArg) {
         return source.lift(new MapOperator(project, thisArg));
     };
 }
-var MapOperator = /** @class */ (function () {
+var MapOperator = (function () {
     function MapOperator(project, thisArg) {
         this.project = project;
         this.thisArg = thisArg;
@@ -6150,14 +6104,13 @@ var MapOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var MapSubscriber = /** @class */ (function (_super) {
+var MapSubscriber = (function (_super) {
     __extends(MapSubscriber, _super);
     function MapSubscriber(destination, project, thisArg) {
-        var _this = _super.call(this, destination) || this;
-        _this.project = project;
-        _this.count = 0;
-        _this.thisArg = thisArg || _this;
-        return _this;
+        _super.call(this, destination);
+        this.project = project;
+        this.count = 0;
+        this.thisArg = thisArg || this;
     }
     // NOTE: This looks unoptimized, but it's actually purposefully NOT
     // using try/catch optimizations.
@@ -6202,7 +6155,6 @@ function getXMLHttpRequest() {
                     }
                 }
                 catch (e) {
-                    //suppress exceptions
                 }
             }
             return new _root.ActiveXObject(progId);
@@ -6248,10 +6200,10 @@ function ajaxGetJSON(url, headers) {
  * @extends {Ignored}
  * @hide true
  */
-var AjaxObservable = /** @class */ (function (_super) {
+var AjaxObservable = (function (_super) {
     __extends(AjaxObservable, _super);
     function AjaxObservable(urlOrRequest) {
-        var _this = _super.call(this) || this;
+        _super.call(this);
         var request = {
             async: true,
             createXHR: function () {
@@ -6274,8 +6226,7 @@ var AjaxObservable = /** @class */ (function (_super) {
                 }
             }
         }
-        _this.request = request;
-        return _this;
+        this.request = request;
     }
     AjaxObservable.prototype._subscribe = function (subscriber) {
         return new AjaxSubscriber(subscriber, this.request);
@@ -6325,12 +6276,12 @@ var AjaxObservable = /** @class */ (function (_super) {
  * @ignore
  * @extends {Ignored}
  */
-var AjaxSubscriber = /** @class */ (function (_super) {
+var AjaxSubscriber = (function (_super) {
     __extends(AjaxSubscriber, _super);
     function AjaxSubscriber(destination, request) {
-        var _this = _super.call(this, destination) || this;
-        _this.request = request;
-        _this.done = false;
+        _super.call(this, destination);
+        this.request = request;
+        this.done = false;
         var headers = request.headers = request.headers || {};
         // force CORS if requested
         if (!request.crossDomain && !headers['X-Requested-With']) {
@@ -6341,9 +6292,8 @@ var AjaxSubscriber = /** @class */ (function (_super) {
             headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
         }
         // properly serialize body
-        request.body = _this.serializeBody(request.body, request.headers['Content-Type']);
-        _this.send();
-        return _this;
+        request.body = this.serializeBody(request.body, request.headers['Content-Type']);
+        this.send();
     }
     AjaxSubscriber.prototype.next = function (e) {
         this.done = true;
@@ -6411,7 +6361,7 @@ var AjaxSubscriber = /** @class */ (function (_super) {
         }
         switch (contentType) {
             case 'application/x-www-form-urlencoded':
-                return Object.keys(body).map(function (key) { return encodeURI(key) + "=" + encodeURI(body[key]); }).join('&');
+                return Object.keys(body).map(function (key) { return (encodeURI(key) + "=" + encodeURI(body[key])); }).join('&');
             case 'application/json':
                 return JSON.stringify(body);
             default:
@@ -6516,7 +6466,7 @@ var AjaxSubscriber = /** @class */ (function (_super) {
  *
  * @class AjaxResponse
  */
-var AjaxResponse = /** @class */ (function () {
+var AjaxResponse = (function () {
     function AjaxResponse(originalEvent, xhr, request) {
         this.originalEvent = originalEvent;
         this.xhr = xhr;
@@ -6534,17 +6484,16 @@ var AjaxResponse = /** @class */ (function () {
  *
  * @class AjaxError
  */
-var AjaxError = /** @class */ (function (_super) {
+var AjaxError = (function (_super) {
     __extends(AjaxError, _super);
     function AjaxError(message, xhr, request) {
-        var _this = _super.call(this, message) || this;
-        _this.message = message;
-        _this.xhr = xhr;
-        _this.request = request;
-        _this.status = xhr.status;
-        _this.responseType = xhr.responseType || request.responseType;
-        _this.response = parseXhrResponse(_this.responseType, xhr);
-        return _this;
+        _super.call(this, message);
+        this.message = message;
+        this.xhr = xhr;
+        this.request = request;
+        this.status = xhr.status;
+        this.responseType = xhr.responseType || request.responseType;
+        this.response = parseXhrResponse(this.responseType, xhr);
     }
     return AjaxError;
 }(Error));
@@ -6570,10 +6519,10 @@ function parseXhrResponse(responseType, xhr) {
  *
  * @class AjaxTimeoutError
  */
-var AjaxTimeoutError = /** @class */ (function (_super) {
+var AjaxTimeoutError = (function (_super) {
     __extends(AjaxTimeoutError, _super);
     function AjaxTimeoutError(xhr, request) {
-        return _super.call(this, 'ajax timeout', xhr, request) || this;
+        _super.call(this, 'ajax timeout', xhr, request);
     }
     return AjaxTimeoutError;
 }(AjaxError));
@@ -6587,13 +6536,12 @@ Observable.ajax = ajax;
  * @ignore
  * @extends {Ignored}
  */
-var QueueAction = /** @class */ (function (_super) {
+var QueueAction = (function (_super) {
     __extends(QueueAction, _super);
     function QueueAction(scheduler, work) {
-        var _this = _super.call(this, scheduler, work) || this;
-        _this.scheduler = scheduler;
-        _this.work = work;
-        return _this;
+        _super.call(this, scheduler, work);
+        this.scheduler = scheduler;
+        this.work = work;
     }
     QueueAction.prototype.schedule = function (state, delay) {
         if (delay === void 0) { delay = 0; }
@@ -6624,10 +6572,10 @@ var QueueAction = /** @class */ (function (_super) {
     return QueueAction;
 }(AsyncAction));
 
-var QueueScheduler = /** @class */ (function (_super) {
+var QueueScheduler = (function (_super) {
     __extends(QueueScheduler, _super);
     function QueueScheduler() {
-        return _super !== null && _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     return QueueScheduler;
 }(AsyncScheduler));
@@ -6698,17 +6646,16 @@ var queue = new QueueScheduler(QueueAction);
 /**
  * @class ReplaySubject<T>
  */
-var ReplaySubject = /** @class */ (function (_super) {
+var ReplaySubject = (function (_super) {
     __extends(ReplaySubject, _super);
     function ReplaySubject(bufferSize, windowTime, scheduler) {
         if (bufferSize === void 0) { bufferSize = Number.POSITIVE_INFINITY; }
         if (windowTime === void 0) { windowTime = Number.POSITIVE_INFINITY; }
-        var _this = _super.call(this) || this;
-        _this.scheduler = scheduler;
-        _this._events = [];
-        _this._bufferSize = bufferSize < 1 ? 1 : bufferSize;
-        _this._windowTime = windowTime < 1 ? 1 : windowTime;
-        return _this;
+        _super.call(this);
+        this.scheduler = scheduler;
+        this._events = [];
+        this._bufferSize = bufferSize < 1 ? 1 : bufferSize;
+        this._windowTime = windowTime < 1 ? 1 : windowTime;
     }
     ReplaySubject.prototype.next = function (value) {
         var now = this._getNow();
@@ -6777,7 +6724,7 @@ var ReplaySubject = /** @class */ (function (_super) {
     };
     return ReplaySubject;
 }(Subject));
-var ReplayEvent = /** @class */ (function () {
+var ReplayEvent = (function () {
     function ReplayEvent(time, value) {
         this.time = time;
         this.value = value;
@@ -6812,30 +6759,28 @@ var assign = getAssign(_root);
  * @extends {Ignored}
  * @hide true
  */
-var WebSocketSubject = /** @class */ (function (_super) {
+var WebSocketSubject = (function (_super) {
     __extends(WebSocketSubject, _super);
     function WebSocketSubject(urlConfigOrSource, destination) {
-        var _this = this;
         if (urlConfigOrSource instanceof Observable) {
-            _this = _super.call(this, destination, urlConfigOrSource) || this;
+            _super.call(this, destination, urlConfigOrSource);
         }
         else {
-            _this = _super.call(this) || this;
-            _this.WebSocketCtor = _root.WebSocket;
-            _this._output = new Subject();
+            _super.call(this);
+            this.WebSocketCtor = _root.WebSocket;
+            this._output = new Subject();
             if (typeof urlConfigOrSource === 'string') {
-                _this.url = urlConfigOrSource;
+                this.url = urlConfigOrSource;
             }
             else {
                 // WARNING: config object could override important members here.
-                assign(_this, urlConfigOrSource);
+                assign(this, urlConfigOrSource);
             }
-            if (!_this.WebSocketCtor) {
+            if (!this.WebSocketCtor) {
                 throw new Error('no WebSocket constructor can be found');
             }
-            _this.destination = new ReplaySubject();
+            this.destination = new ReplaySubject();
         }
-        return _this;
     }
     WebSocketSubject.prototype.resultSelector = function (e) {
         return JSON.parse(e.data);
@@ -7084,7 +7029,7 @@ function buffer$1(closingNotifier) {
         return source.lift(new BufferOperator(closingNotifier));
     };
 }
-var BufferOperator = /** @class */ (function () {
+var BufferOperator = (function () {
     function BufferOperator(closingNotifier) {
         this.closingNotifier = closingNotifier;
     }
@@ -7098,13 +7043,12 @@ var BufferOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var BufferSubscriber = /** @class */ (function (_super) {
+var BufferSubscriber = (function (_super) {
     __extends(BufferSubscriber, _super);
     function BufferSubscriber(destination, closingNotifier) {
-        var _this = _super.call(this, destination) || this;
-        _this.buffer = [];
-        _this.add(subscribeToResult(_this, closingNotifier));
-        return _this;
+        _super.call(this, destination);
+        this.buffer = [];
+        this.add(subscribeToResult(this, closingNotifier));
     }
     BufferSubscriber.prototype._next = function (value) {
         this.buffer.push(value);
@@ -7202,7 +7146,7 @@ function bufferCount$1(bufferSize, startBufferEvery) {
         return source.lift(new BufferCountOperator(bufferSize, startBufferEvery));
     };
 }
-var BufferCountOperator = /** @class */ (function () {
+var BufferCountOperator = (function () {
     function BufferCountOperator(bufferSize, startBufferEvery) {
         this.bufferSize = bufferSize;
         this.startBufferEvery = startBufferEvery;
@@ -7223,13 +7167,12 @@ var BufferCountOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var BufferCountSubscriber = /** @class */ (function (_super) {
+var BufferCountSubscriber = (function (_super) {
     __extends(BufferCountSubscriber, _super);
     function BufferCountSubscriber(destination, bufferSize) {
-        var _this = _super.call(this, destination) || this;
-        _this.bufferSize = bufferSize;
-        _this.buffer = [];
-        return _this;
+        _super.call(this, destination);
+        this.bufferSize = bufferSize;
+        this.buffer = [];
     }
     BufferCountSubscriber.prototype._next = function (value) {
         var buffer = this.buffer;
@@ -7253,15 +7196,14 @@ var BufferCountSubscriber = /** @class */ (function (_super) {
  * @ignore
  * @extends {Ignored}
  */
-var BufferSkipCountSubscriber = /** @class */ (function (_super) {
+var BufferSkipCountSubscriber = (function (_super) {
     __extends(BufferSkipCountSubscriber, _super);
     function BufferSkipCountSubscriber(destination, bufferSize, startBufferEvery) {
-        var _this = _super.call(this, destination) || this;
-        _this.bufferSize = bufferSize;
-        _this.startBufferEvery = startBufferEvery;
-        _this.buffers = [];
-        _this.count = 0;
-        return _this;
+        _super.call(this, destination);
+        this.bufferSize = bufferSize;
+        this.startBufferEvery = startBufferEvery;
+        this.buffers = [];
+        this.count = 0;
     }
     BufferSkipCountSubscriber.prototype._next = function (value) {
         var _a = this, bufferSize = _a.bufferSize, startBufferEvery = _a.startBufferEvery, buffers = _a.buffers, count = _a.count;
@@ -7402,7 +7344,7 @@ function bufferTime$1(bufferTimeSpan) {
         return source.lift(new BufferTimeOperator(bufferTimeSpan, bufferCreationInterval, maxBufferSize, scheduler));
     };
 }
-var BufferTimeOperator = /** @class */ (function () {
+var BufferTimeOperator = (function () {
     function BufferTimeOperator(bufferTimeSpan, bufferCreationInterval, maxBufferSize, scheduler) {
         this.bufferTimeSpan = bufferTimeSpan;
         this.bufferCreationInterval = bufferCreationInterval;
@@ -7414,7 +7356,7 @@ var BufferTimeOperator = /** @class */ (function () {
     };
     return BufferTimeOperator;
 }());
-var Context = /** @class */ (function () {
+var Context = (function () {
     function Context() {
         this.buffer = [];
     }
@@ -7425,39 +7367,38 @@ var Context = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var BufferTimeSubscriber = /** @class */ (function (_super) {
+var BufferTimeSubscriber = (function (_super) {
     __extends(BufferTimeSubscriber, _super);
     function BufferTimeSubscriber(destination, bufferTimeSpan, bufferCreationInterval, maxBufferSize, scheduler) {
-        var _this = _super.call(this, destination) || this;
-        _this.bufferTimeSpan = bufferTimeSpan;
-        _this.bufferCreationInterval = bufferCreationInterval;
-        _this.maxBufferSize = maxBufferSize;
-        _this.scheduler = scheduler;
-        _this.contexts = [];
-        var context = _this.openContext();
-        _this.timespanOnly = bufferCreationInterval == null || bufferCreationInterval < 0;
-        if (_this.timespanOnly) {
-            var timeSpanOnlyState = { subscriber: _this, context: context, bufferTimeSpan: bufferTimeSpan };
-            _this.add(context.closeAction = scheduler.schedule(dispatchBufferTimeSpanOnly, bufferTimeSpan, timeSpanOnlyState));
+        _super.call(this, destination);
+        this.bufferTimeSpan = bufferTimeSpan;
+        this.bufferCreationInterval = bufferCreationInterval;
+        this.maxBufferSize = maxBufferSize;
+        this.scheduler = scheduler;
+        this.contexts = [];
+        var context = this.openContext();
+        this.timespanOnly = bufferCreationInterval == null || bufferCreationInterval < 0;
+        if (this.timespanOnly) {
+            var timeSpanOnlyState = { subscriber: this, context: context, bufferTimeSpan: bufferTimeSpan };
+            this.add(context.closeAction = scheduler.schedule(dispatchBufferTimeSpanOnly, bufferTimeSpan, timeSpanOnlyState));
         }
         else {
-            var closeState = { subscriber: _this, context: context };
-            var creationState = { bufferTimeSpan: bufferTimeSpan, bufferCreationInterval: bufferCreationInterval, subscriber: _this, scheduler: scheduler };
-            _this.add(context.closeAction = scheduler.schedule(dispatchBufferClose, bufferTimeSpan, closeState));
-            _this.add(scheduler.schedule(dispatchBufferCreation, bufferCreationInterval, creationState));
+            var closeState = { subscriber: this, context: context };
+            var creationState = { bufferTimeSpan: bufferTimeSpan, bufferCreationInterval: bufferCreationInterval, subscriber: this, scheduler: scheduler };
+            this.add(context.closeAction = scheduler.schedule(dispatchBufferClose, bufferTimeSpan, closeState));
+            this.add(scheduler.schedule(dispatchBufferCreation, bufferCreationInterval, creationState));
         }
-        return _this;
     }
     BufferTimeSubscriber.prototype._next = function (value) {
         var contexts = this.contexts;
         var len = contexts.length;
         var filledBufferContext;
         for (var i = 0; i < len; i++) {
-            var context_1 = contexts[i];
-            var buffer = context_1.buffer;
+            var context = contexts[i];
+            var buffer = context.buffer;
             buffer.push(value);
             if (buffer.length == this.maxBufferSize) {
-                filledBufferContext = context_1;
+                filledBufferContext = context;
             }
         }
         if (filledBufferContext) {
@@ -7471,8 +7412,8 @@ var BufferTimeSubscriber = /** @class */ (function (_super) {
     BufferTimeSubscriber.prototype._complete = function () {
         var _a = this, contexts = _a.contexts, destination = _a.destination;
         while (contexts.length > 0) {
-            var context_2 = contexts.shift();
-            destination.next(context_2.buffer);
+            var context = contexts.shift();
+            destination.next(context.buffer);
         }
         _super.prototype._complete.call(this);
     };
@@ -7638,7 +7579,7 @@ function bufferToggle$1(openings, closingSelector) {
         return source.lift(new BufferToggleOperator(openings, closingSelector));
     };
 }
-var BufferToggleOperator = /** @class */ (function () {
+var BufferToggleOperator = (function () {
     function BufferToggleOperator(openings, closingSelector) {
         this.openings = openings;
         this.closingSelector = closingSelector;
@@ -7653,15 +7594,14 @@ var BufferToggleOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var BufferToggleSubscriber = /** @class */ (function (_super) {
+var BufferToggleSubscriber = (function (_super) {
     __extends(BufferToggleSubscriber, _super);
     function BufferToggleSubscriber(destination, openings, closingSelector) {
-        var _this = _super.call(this, destination) || this;
-        _this.openings = openings;
-        _this.closingSelector = closingSelector;
-        _this.contexts = [];
-        _this.add(subscribeToResult(_this, openings));
-        return _this;
+        _super.call(this, destination);
+        this.openings = openings;
+        this.closingSelector = closingSelector;
+        this.contexts = [];
+        this.add(subscribeToResult(this, openings));
     }
     BufferToggleSubscriber.prototype._next = function (value) {
         var contexts = this.contexts;
@@ -7673,10 +7613,10 @@ var BufferToggleSubscriber = /** @class */ (function (_super) {
     BufferToggleSubscriber.prototype._error = function (err) {
         var contexts = this.contexts;
         while (contexts.length > 0) {
-            var context_1 = contexts.shift();
-            context_1.subscription.unsubscribe();
-            context_1.buffer = null;
-            context_1.subscription = null;
+            var context = contexts.shift();
+            context.subscription.unsubscribe();
+            context.buffer = null;
+            context.subscription = null;
         }
         this.contexts = null;
         _super.prototype._error.call(this, err);
@@ -7684,11 +7624,11 @@ var BufferToggleSubscriber = /** @class */ (function (_super) {
     BufferToggleSubscriber.prototype._complete = function () {
         var contexts = this.contexts;
         while (contexts.length > 0) {
-            var context_2 = contexts.shift();
-            this.destination.next(context_2.buffer);
-            context_2.subscription.unsubscribe();
-            context_2.buffer = null;
-            context_2.subscription = null;
+            var context = contexts.shift();
+            this.destination.next(context.buffer);
+            context.subscription.unsubscribe();
+            context.buffer = null;
+            context.subscription = null;
         }
         this.contexts = null;
         _super.prototype._complete.call(this);
@@ -7822,7 +7762,7 @@ function bufferWhen$1(closingSelector) {
         return source.lift(new BufferWhenOperator(closingSelector));
     };
 }
-var BufferWhenOperator = /** @class */ (function () {
+var BufferWhenOperator = (function () {
     function BufferWhenOperator(closingSelector) {
         this.closingSelector = closingSelector;
     }
@@ -7836,14 +7776,13 @@ var BufferWhenOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var BufferWhenSubscriber = /** @class */ (function (_super) {
+var BufferWhenSubscriber = (function (_super) {
     __extends(BufferWhenSubscriber, _super);
     function BufferWhenSubscriber(destination, closingSelector) {
-        var _this = _super.call(this, destination) || this;
-        _this.closingSelector = closingSelector;
-        _this.subscribing = false;
-        _this.openBuffer();
-        return _this;
+        _super.call(this, destination);
+        this.closingSelector = closingSelector;
+        this.subscribing = false;
+        this.openBuffer();
     }
     BufferWhenSubscriber.prototype._next = function (value) {
         this.buffer.push(value);
@@ -8000,7 +7939,7 @@ function catchError(selector) {
         return (operator.caught = caught);
     };
 }
-var CatchOperator = /** @class */ (function () {
+var CatchOperator = (function () {
     function CatchOperator(selector) {
         this.selector = selector;
     }
@@ -8014,13 +7953,12 @@ var CatchOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var CatchSubscriber = /** @class */ (function (_super) {
+var CatchSubscriber = (function (_super) {
     __extends(CatchSubscriber, _super);
     function CatchSubscriber(destination, selector, caught) {
-        var _this = _super.call(this, destination) || this;
-        _this.selector = selector;
-        _this.caught = caught;
-        return _this;
+        _super.call(this, destination);
+        this.selector = selector;
+        this.caught = caught;
     }
     // NOTE: overriding `error` instead of `_error` because we don't want
     // to have this flag this subscriber as `isStopped`. We can mimic the
@@ -8207,7 +8145,7 @@ Observable.prototype.combineAll = combineAll$$1;
 function combineLatest$2() {
     var observables = [];
     for (var _i = 0; _i < arguments.length; _i++) {
-        observables[_i] = arguments[_i];
+        observables[_i - 0] = arguments[_i];
     }
     return combineLatest$1.apply(void 0, observables)(this);
 }
@@ -8267,7 +8205,7 @@ Observable.prototype.combineLatest = combineLatest$2;
 function concat$2() {
     var observables = [];
     for (var _i = 0; _i < arguments.length; _i++) {
-        observables[_i] = arguments[_i];
+        observables[_i - 0] = arguments[_i];
     }
     return function (source) { return source.lift.call(concat.apply(void 0, [source].concat(observables))); };
 }
@@ -8325,7 +8263,7 @@ function concat$2() {
 function concat$1() {
     var observables = [];
     for (var _i = 0; _i < arguments.length; _i++) {
-        observables[_i] = arguments[_i];
+        observables[_i - 0] = arguments[_i];
     }
     return concat$2.apply(void 0, observables)(this);
 }
@@ -8692,7 +8630,7 @@ Observable.prototype.concatMapTo = concatMapTo$$1;
 function count$1(predicate) {
     return function (source) { return source.lift(new CountOperator(predicate, source)); };
 }
-var CountOperator = /** @class */ (function () {
+var CountOperator = (function () {
     function CountOperator(predicate, source) {
         this.predicate = predicate;
         this.source = source;
@@ -8707,15 +8645,14 @@ var CountOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var CountSubscriber = /** @class */ (function (_super) {
+var CountSubscriber = (function (_super) {
     __extends(CountSubscriber, _super);
     function CountSubscriber(destination, predicate, source) {
-        var _this = _super.call(this, destination) || this;
-        _this.predicate = predicate;
-        _this.source = source;
-        _this.count = 0;
-        _this.index = 0;
-        return _this;
+        _super.call(this, destination);
+        this.predicate = predicate;
+        this.source = source;
+        this.count = 0;
+        this.index = 0;
     }
     CountSubscriber.prototype._next = function (value) {
         if (this.predicate) {
@@ -8844,7 +8781,7 @@ function dematerialize$1() {
         return source.lift(new DeMaterializeOperator());
     };
 }
-var DeMaterializeOperator = /** @class */ (function () {
+var DeMaterializeOperator = (function () {
     function DeMaterializeOperator() {
     }
     DeMaterializeOperator.prototype.call = function (subscriber, source) {
@@ -8857,10 +8794,10 @@ var DeMaterializeOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var DeMaterializeSubscriber = /** @class */ (function (_super) {
+var DeMaterializeSubscriber = (function (_super) {
     __extends(DeMaterializeSubscriber, _super);
     function DeMaterializeSubscriber(destination) {
-        return _super.call(this, destination) || this;
+        _super.call(this, destination);
     }
     DeMaterializeSubscriber.prototype._next = function (value) {
         value.observe(this.destination);
@@ -8959,7 +8896,7 @@ Observable.prototype.dematerialize = dematerialize$$1;
 function debounce$1(durationSelector) {
     return function (source) { return source.lift(new DebounceOperator(durationSelector)); };
 }
-var DebounceOperator = /** @class */ (function () {
+var DebounceOperator = (function () {
     function DebounceOperator(durationSelector) {
         this.durationSelector = durationSelector;
     }
@@ -8973,14 +8910,13 @@ var DebounceOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var DebounceSubscriber = /** @class */ (function (_super) {
+var DebounceSubscriber = (function (_super) {
     __extends(DebounceSubscriber, _super);
     function DebounceSubscriber(destination, durationSelector) {
-        var _this = _super.call(this, destination) || this;
-        _this.durationSelector = durationSelector;
-        _this.hasValue = false;
-        _this.durationSubscription = null;
-        return _this;
+        _super.call(this, destination);
+        this.durationSelector = durationSelector;
+        this.hasValue = false;
+        this.durationSubscription = null;
     }
     DebounceSubscriber.prototype._next = function (value) {
         try {
@@ -9131,7 +9067,7 @@ function debounceTime$1(dueTime, scheduler) {
     if (scheduler === void 0) { scheduler = async; }
     return function (source) { return source.lift(new DebounceTimeOperator(dueTime, scheduler)); };
 }
-var DebounceTimeOperator = /** @class */ (function () {
+var DebounceTimeOperator = (function () {
     function DebounceTimeOperator(dueTime, scheduler) {
         this.dueTime = dueTime;
         this.scheduler = scheduler;
@@ -9146,16 +9082,15 @@ var DebounceTimeOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var DebounceTimeSubscriber = /** @class */ (function (_super) {
+var DebounceTimeSubscriber = (function (_super) {
     __extends(DebounceTimeSubscriber, _super);
     function DebounceTimeSubscriber(destination, dueTime, scheduler) {
-        var _this = _super.call(this, destination) || this;
-        _this.dueTime = dueTime;
-        _this.scheduler = scheduler;
-        _this.debouncedSubscription = null;
-        _this.lastValue = null;
-        _this.hasValue = false;
-        return _this;
+        _super.call(this, destination);
+        this.dueTime = dueTime;
+        this.scheduler = scheduler;
+        this.debouncedSubscription = null;
+        this.lastValue = null;
+        this.hasValue = false;
     }
     DebounceTimeSubscriber.prototype._next = function (value) {
         this.clearDebounce();
@@ -9277,7 +9212,7 @@ function defaultIfEmpty$1(defaultValue) {
     if (defaultValue === void 0) { defaultValue = null; }
     return function (source) { return source.lift(new DefaultIfEmptyOperator(defaultValue)); };
 }
-var DefaultIfEmptyOperator = /** @class */ (function () {
+var DefaultIfEmptyOperator = (function () {
     function DefaultIfEmptyOperator(defaultValue) {
         this.defaultValue = defaultValue;
     }
@@ -9291,13 +9226,12 @@ var DefaultIfEmptyOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var DefaultIfEmptySubscriber = /** @class */ (function (_super) {
+var DefaultIfEmptySubscriber = (function (_super) {
     __extends(DefaultIfEmptySubscriber, _super);
     function DefaultIfEmptySubscriber(destination, defaultValue) {
-        var _this = _super.call(this, destination) || this;
-        _this.defaultValue = defaultValue;
-        _this.isEmpty = true;
-        return _this;
+        _super.call(this, destination);
+        this.defaultValue = defaultValue;
+        this.isEmpty = true;
     }
     DefaultIfEmptySubscriber.prototype._next = function (value) {
         this.isEmpty = false;
@@ -9395,7 +9329,7 @@ function delay$1(delay, scheduler) {
     var delayFor = absoluteDelay ? (+delay - scheduler.now()) : Math.abs(delay);
     return function (source) { return source.lift(new DelayOperator(delayFor, scheduler)); };
 }
-var DelayOperator = /** @class */ (function () {
+var DelayOperator = (function () {
     function DelayOperator(delay, scheduler) {
         this.delay = delay;
         this.scheduler = scheduler;
@@ -9410,16 +9344,15 @@ var DelayOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var DelaySubscriber = /** @class */ (function (_super) {
+var DelaySubscriber = (function (_super) {
     __extends(DelaySubscriber, _super);
     function DelaySubscriber(destination, delay, scheduler) {
-        var _this = _super.call(this, destination) || this;
-        _this.delay = delay;
-        _this.scheduler = scheduler;
-        _this.queue = [];
-        _this.active = false;
-        _this.errored = false;
-        return _this;
+        _super.call(this, destination);
+        this.delay = delay;
+        this.scheduler = scheduler;
+        this.queue = [];
+        this.active = false;
+        this.errored = false;
     }
     DelaySubscriber.dispatch = function (state) {
         var source = state.source;
@@ -9467,7 +9400,7 @@ var DelaySubscriber = /** @class */ (function (_super) {
     };
     return DelaySubscriber;
 }(Subscriber));
-var DelayMessage = /** @class */ (function () {
+var DelayMessage = (function () {
     function DelayMessage(time, notification) {
         this.time = time;
         this.notification = notification;
@@ -9575,7 +9508,7 @@ function delayWhen$1(delayDurationSelector, subscriptionDelay) {
     }
     return function (source) { return source.lift(new DelayWhenOperator(delayDurationSelector)); };
 }
-var DelayWhenOperator = /** @class */ (function () {
+var DelayWhenOperator = (function () {
     function DelayWhenOperator(delayDurationSelector) {
         this.delayDurationSelector = delayDurationSelector;
     }
@@ -9589,15 +9522,14 @@ var DelayWhenOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var DelayWhenSubscriber = /** @class */ (function (_super) {
+var DelayWhenSubscriber = (function (_super) {
     __extends(DelayWhenSubscriber, _super);
     function DelayWhenSubscriber(destination, delayDurationSelector) {
-        var _this = _super.call(this, destination) || this;
-        _this.delayDurationSelector = delayDurationSelector;
-        _this.completed = false;
-        _this.delayNotifierSubscriptions = [];
-        _this.values = [];
-        return _this;
+        _super.call(this, destination);
+        this.delayDurationSelector = delayDurationSelector;
+        this.completed = false;
+        this.delayNotifierSubscriptions = [];
+        this.values = [];
     }
     DelayWhenSubscriber.prototype.notifyNext = function (outerValue, innerValue, outerIndex, innerIndex, innerSub) {
         this.destination.next(outerValue);
@@ -9660,13 +9592,12 @@ var DelayWhenSubscriber = /** @class */ (function (_super) {
  * @ignore
  * @extends {Ignored}
  */
-var SubscriptionDelayObservable = /** @class */ (function (_super) {
+var SubscriptionDelayObservable = (function (_super) {
     __extends(SubscriptionDelayObservable, _super);
     function SubscriptionDelayObservable(source, subscriptionDelay) {
-        var _this = _super.call(this) || this;
-        _this.source = source;
-        _this.subscriptionDelay = subscriptionDelay;
-        return _this;
+        _super.call(this);
+        this.source = source;
+        this.subscriptionDelay = subscriptionDelay;
     }
     SubscriptionDelayObservable.prototype._subscribe = function (subscriber) {
         this.subscriptionDelay.subscribe(new SubscriptionDelaySubscriber(subscriber, this.source));
@@ -9678,14 +9609,13 @@ var SubscriptionDelayObservable = /** @class */ (function (_super) {
  * @ignore
  * @extends {Ignored}
  */
-var SubscriptionDelaySubscriber = /** @class */ (function (_super) {
+var SubscriptionDelaySubscriber = (function (_super) {
     __extends(SubscriptionDelaySubscriber, _super);
     function SubscriptionDelaySubscriber(parent, source) {
-        var _this = _super.call(this) || this;
-        _this.parent = parent;
-        _this.source = source;
-        _this.sourceSubscribed = false;
-        return _this;
+        _super.call(this);
+        this.parent = parent;
+        this.source = source;
+        this.sourceSubscribed = false;
     }
     SubscriptionDelaySubscriber.prototype._next = function (unused) {
         this.subscribeToSource();
@@ -9761,7 +9691,7 @@ Observable.prototype.delayWhen = delayWhen$$1;
 function minimalSetImpl() {
     // THIS IS NOT a full impl of Set, this is just the minimum
     // bits of functionality we need for this library.
-    return /** @class */ (function () {
+    return (function () {
         function MinimalSet() {
             this._values = [];
         }
@@ -9836,7 +9766,7 @@ var Set = _root.Set || minimalSetImpl();
 function distinct$1(keySelector, flushes) {
     return function (source) { return source.lift(new DistinctOperator(keySelector, flushes)); };
 }
-var DistinctOperator = /** @class */ (function () {
+var DistinctOperator = (function () {
     function DistinctOperator(keySelector, flushes) {
         this.keySelector = keySelector;
         this.flushes = flushes;
@@ -9851,16 +9781,15 @@ var DistinctOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var DistinctSubscriber = /** @class */ (function (_super) {
+var DistinctSubscriber = (function (_super) {
     __extends(DistinctSubscriber, _super);
     function DistinctSubscriber(destination, keySelector, flushes) {
-        var _this = _super.call(this, destination) || this;
-        _this.keySelector = keySelector;
-        _this.values = new Set();
+        _super.call(this, destination);
+        this.keySelector = keySelector;
+        this.values = new Set();
         if (flushes) {
-            _this.add(subscribeToResult(_this, flushes));
+            this.add(subscribeToResult(this, flushes));
         }
-        return _this;
     }
     DistinctSubscriber.prototype.notifyNext = function (outerValue, innerValue, outerIndex, innerIndex, innerSub) {
         this.values.clear();
@@ -9992,7 +9921,7 @@ Observable.prototype.distinct = distinct$$1;
 function distinctUntilChanged$1(compare, keySelector) {
     return function (source) { return source.lift(new DistinctUntilChangedOperator(compare, keySelector)); };
 }
-var DistinctUntilChangedOperator = /** @class */ (function () {
+var DistinctUntilChangedOperator = (function () {
     function DistinctUntilChangedOperator(compare, keySelector) {
         this.compare = compare;
         this.keySelector = keySelector;
@@ -10007,16 +9936,15 @@ var DistinctUntilChangedOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var DistinctUntilChangedSubscriber = /** @class */ (function (_super) {
+var DistinctUntilChangedSubscriber = (function (_super) {
     __extends(DistinctUntilChangedSubscriber, _super);
     function DistinctUntilChangedSubscriber(destination, compare, keySelector) {
-        var _this = _super.call(this, destination) || this;
-        _this.keySelector = keySelector;
-        _this.hasKey = false;
+        _super.call(this, destination);
+        this.keySelector = keySelector;
+        this.hasKey = false;
         if (typeof compare === 'function') {
-            _this.compare = compare;
+            this.compare = compare;
         }
-        return _this;
     }
     DistinctUntilChangedSubscriber.prototype.compare = function (x, y) {
         return x === y;
@@ -10267,7 +10195,7 @@ function tap(nextOrObserver, error, complete) {
         return source.lift(new DoOperator(nextOrObserver, error, complete));
     };
 }
-var DoOperator = /** @class */ (function () {
+var DoOperator = (function () {
     function DoOperator(nextOrObserver, error, complete) {
         this.nextOrObserver = nextOrObserver;
         this.error = error;
@@ -10283,15 +10211,14 @@ var DoOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var DoSubscriber = /** @class */ (function (_super) {
+var DoSubscriber = (function (_super) {
     __extends(DoSubscriber, _super);
     function DoSubscriber(destination, nextOrObserver, error, complete) {
-        var _this = _super.call(this, destination) || this;
+        _super.call(this, destination);
         var safeSubscriber = new Subscriber(nextOrObserver, error, complete);
         safeSubscriber.syncErrorThrowable = true;
-        _this.add(safeSubscriber);
-        _this.safeSubscriber = safeSubscriber;
-        return _this;
+        this.add(safeSubscriber);
+        this.safeSubscriber = safeSubscriber;
     }
     DoSubscriber.prototype._next = function (value) {
         var safeSubscriber = this.safeSubscriber;
@@ -10415,7 +10342,7 @@ Observable.prototype._do = _do;
 function exhaust$1() {
     return function (source) { return source.lift(new SwitchFirstOperator()); };
 }
-var SwitchFirstOperator = /** @class */ (function () {
+var SwitchFirstOperator = (function () {
     function SwitchFirstOperator() {
     }
     SwitchFirstOperator.prototype.call = function (subscriber, source) {
@@ -10428,13 +10355,12 @@ var SwitchFirstOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var SwitchFirstSubscriber = /** @class */ (function (_super) {
+var SwitchFirstSubscriber = (function (_super) {
     __extends(SwitchFirstSubscriber, _super);
     function SwitchFirstSubscriber(destination) {
-        var _this = _super.call(this, destination) || this;
-        _this.hasCompleted = false;
-        _this.hasSubscription = false;
-        return _this;
+        _super.call(this, destination);
+        this.hasCompleted = false;
+        this.hasSubscription = false;
     }
     SwitchFirstSubscriber.prototype._next = function (value) {
         if (!this.hasSubscription) {
@@ -10548,7 +10474,7 @@ Observable.prototype.exhaust = exhaust$$1;
 function exhaustMap$1(project, resultSelector) {
     return function (source) { return source.lift(new SwitchFirstMapOperator(project, resultSelector)); };
 }
-var SwitchFirstMapOperator = /** @class */ (function () {
+var SwitchFirstMapOperator = (function () {
     function SwitchFirstMapOperator(project, resultSelector) {
         this.project = project;
         this.resultSelector = resultSelector;
@@ -10563,16 +10489,15 @@ var SwitchFirstMapOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var SwitchFirstMapSubscriber = /** @class */ (function (_super) {
+var SwitchFirstMapSubscriber = (function (_super) {
     __extends(SwitchFirstMapSubscriber, _super);
     function SwitchFirstMapSubscriber(destination, project, resultSelector) {
-        var _this = _super.call(this, destination) || this;
-        _this.project = project;
-        _this.resultSelector = resultSelector;
-        _this.hasSubscription = false;
-        _this.hasCompleted = false;
-        _this.index = 0;
-        return _this;
+        _super.call(this, destination);
+        this.project = project;
+        this.resultSelector = resultSelector;
+        this.hasSubscription = false;
+        this.hasCompleted = false;
+        this.index = 0;
     }
     SwitchFirstMapSubscriber.prototype._next = function (value) {
         if (!this.hasSubscription) {
@@ -10733,7 +10658,7 @@ function expand$1(project, concurrent, scheduler) {
     concurrent = (concurrent || 0) < 1 ? Number.POSITIVE_INFINITY : concurrent;
     return function (source) { return source.lift(new ExpandOperator(project, concurrent, scheduler)); };
 }
-var ExpandOperator = /** @class */ (function () {
+var ExpandOperator = (function () {
     function ExpandOperator(project, concurrent, scheduler) {
         this.project = project;
         this.concurrent = concurrent;
@@ -10749,20 +10674,19 @@ var ExpandOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var ExpandSubscriber = /** @class */ (function (_super) {
+var ExpandSubscriber = (function (_super) {
     __extends(ExpandSubscriber, _super);
     function ExpandSubscriber(destination, project, concurrent, scheduler) {
-        var _this = _super.call(this, destination) || this;
-        _this.project = project;
-        _this.concurrent = concurrent;
-        _this.scheduler = scheduler;
-        _this.index = 0;
-        _this.active = 0;
-        _this.hasCompleted = false;
+        _super.call(this, destination);
+        this.project = project;
+        this.concurrent = concurrent;
+        this.scheduler = scheduler;
+        this.index = 0;
+        this.active = 0;
+        this.hasCompleted = false;
         if (concurrent < Number.POSITIVE_INFINITY) {
-            _this.buffer = [];
+            this.buffer = [];
         }
-        return _this;
     }
     ExpandSubscriber.dispatch = function (arg) {
         var subscriber = arg.subscriber, result = arg.result, value = arg.value, index = arg.index;
@@ -10885,15 +10809,13 @@ Observable.prototype.expand = expand$$1;
  *
  * @class ArgumentOutOfRangeError
  */
-var ArgumentOutOfRangeError = /** @class */ (function (_super) {
+var ArgumentOutOfRangeError = (function (_super) {
     __extends(ArgumentOutOfRangeError, _super);
     function ArgumentOutOfRangeError() {
-        var _this = this;
-        var err = _this = _super.call(this, 'argument out of range') || this;
-        _this.name = err.name = 'ArgumentOutOfRangeError';
-        _this.stack = err.stack;
-        _this.message = err.message;
-        return _this;
+        var err = _super.call(this, 'argument out of range');
+        this.name = err.name = 'ArgumentOutOfRangeError';
+        this.stack = err.stack;
+        this.message = err.message;
     }
     return ArgumentOutOfRangeError;
 }(Error));
@@ -10943,7 +10865,7 @@ var ArgumentOutOfRangeError = /** @class */ (function (_super) {
 function elementAt$1(index, defaultValue) {
     return function (source) { return source.lift(new ElementAtOperator(index, defaultValue)); };
 }
-var ElementAtOperator = /** @class */ (function () {
+var ElementAtOperator = (function () {
     function ElementAtOperator(index, defaultValue) {
         this.index = index;
         this.defaultValue = defaultValue;
@@ -10961,13 +10883,12 @@ var ElementAtOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var ElementAtSubscriber = /** @class */ (function (_super) {
+var ElementAtSubscriber = (function (_super) {
     __extends(ElementAtSubscriber, _super);
     function ElementAtSubscriber(destination, index, defaultValue) {
-        var _this = _super.call(this, destination) || this;
-        _this.index = index;
-        _this.defaultValue = defaultValue;
-        return _this;
+        _super.call(this, destination);
+        this.index = index;
+        this.defaultValue = defaultValue;
     }
     ElementAtSubscriber.prototype._next = function (x) {
         if (this.index-- === 0) {
@@ -11083,7 +11004,7 @@ function filter$1(predicate, thisArg) {
         return source.lift(new FilterOperator(predicate, thisArg));
     };
 }
-var FilterOperator = /** @class */ (function () {
+var FilterOperator = (function () {
     function FilterOperator(predicate, thisArg) {
         this.predicate = predicate;
         this.thisArg = thisArg;
@@ -11098,14 +11019,13 @@ var FilterOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var FilterSubscriber = /** @class */ (function (_super) {
+var FilterSubscriber = (function (_super) {
     __extends(FilterSubscriber, _super);
     function FilterSubscriber(destination, predicate, thisArg) {
-        var _this = _super.call(this, destination) || this;
-        _this.predicate = predicate;
-        _this.thisArg = thisArg;
-        _this.count = 0;
-        return _this;
+        _super.call(this, destination);
+        this.predicate = predicate;
+        this.thisArg = thisArg;
+        this.count = 0;
     }
     // the try catch block below is left specifically for
     // optimization and perf reasons. a tryCatcher is not necessary here.
@@ -11182,7 +11102,7 @@ Observable.prototype.filter = filter$$1;
 function finalize(callback) {
     return function (source) { return source.lift(new FinallyOperator(callback)); };
 }
-var FinallyOperator = /** @class */ (function () {
+var FinallyOperator = (function () {
     function FinallyOperator(callback) {
         this.callback = callback;
     }
@@ -11196,12 +11116,11 @@ var FinallyOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var FinallySubscriber = /** @class */ (function (_super) {
+var FinallySubscriber = (function (_super) {
     __extends(FinallySubscriber, _super);
     function FinallySubscriber(destination, callback) {
-        var _this = _super.call(this, destination) || this;
-        _this.add(new Subscription(callback));
-        return _this;
+        _super.call(this, destination);
+        this.add(new Subscription(callback));
     }
     return FinallySubscriber;
 }(Subscriber));
@@ -11260,7 +11179,7 @@ function find$1(predicate, thisArg) {
     }
     return function (source) { return source.lift(new FindValueOperator(predicate, source, false, thisArg)); };
 }
-var FindValueOperator = /** @class */ (function () {
+var FindValueOperator = (function () {
     function FindValueOperator(predicate, source, yieldIndex, thisArg) {
         this.predicate = predicate;
         this.source = source;
@@ -11277,16 +11196,15 @@ var FindValueOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var FindValueSubscriber = /** @class */ (function (_super) {
+var FindValueSubscriber = (function (_super) {
     __extends(FindValueSubscriber, _super);
     function FindValueSubscriber(destination, predicate, source, yieldIndex, thisArg) {
-        var _this = _super.call(this, destination) || this;
-        _this.predicate = predicate;
-        _this.source = source;
-        _this.yieldIndex = yieldIndex;
-        _this.thisArg = thisArg;
-        _this.index = 0;
-        return _this;
+        _super.call(this, destination);
+        this.predicate = predicate;
+        this.source = source;
+        this.yieldIndex = yieldIndex;
+        this.thisArg = thisArg;
+        this.index = 0;
     }
     FindValueSubscriber.prototype.notifyComplete = function (value) {
         var destination = this.destination;
@@ -11440,15 +11358,13 @@ Observable.prototype.findIndex = findIndex$$1;
  *
  * @class EmptyError
  */
-var EmptyError = /** @class */ (function (_super) {
+var EmptyError = (function (_super) {
     __extends(EmptyError, _super);
     function EmptyError() {
-        var _this = this;
-        var err = _this = _super.call(this, 'no elements in sequence') || this;
-        _this.name = err.name = 'EmptyError';
-        _this.stack = err.stack;
-        _this.message = err.message;
-        return _this;
+        var err = _super.call(this, 'no elements in sequence');
+        this.name = err.name = 'EmptyError';
+        this.stack = err.stack;
+        this.message = err.message;
     }
     return EmptyError;
 }(Error));
@@ -11505,7 +11421,7 @@ var EmptyError = /** @class */ (function (_super) {
 function first$1(predicate, resultSelector, defaultValue) {
     return function (source) { return source.lift(new FirstOperator(predicate, resultSelector, defaultValue, source)); };
 }
-var FirstOperator = /** @class */ (function () {
+var FirstOperator = (function () {
     function FirstOperator(predicate, resultSelector, defaultValue, source) {
         this.predicate = predicate;
         this.resultSelector = resultSelector;
@@ -11522,18 +11438,17 @@ var FirstOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var FirstSubscriber = /** @class */ (function (_super) {
+var FirstSubscriber = (function (_super) {
     __extends(FirstSubscriber, _super);
     function FirstSubscriber(destination, predicate, resultSelector, defaultValue, source) {
-        var _this = _super.call(this, destination) || this;
-        _this.predicate = predicate;
-        _this.resultSelector = resultSelector;
-        _this.defaultValue = defaultValue;
-        _this.source = source;
-        _this.index = 0;
-        _this.hasCompleted = false;
-        _this._emitted = false;
-        return _this;
+        _super.call(this, destination);
+        this.predicate = predicate;
+        this.resultSelector = resultSelector;
+        this.defaultValue = defaultValue;
+        this.source = source;
+        this.index = 0;
+        this.hasCompleted = false;
+        this._emitted = false;
     }
     FirstSubscriber.prototype._next = function (value) {
         var index = this.index++;
@@ -11652,7 +11567,7 @@ function first$$1(predicate, resultSelector, defaultValue) {
 
 Observable.prototype.first = first$$1;
 
-var MapPolyfill = /** @class */ (function () {
+var MapPolyfill = (function () {
     function MapPolyfill() {
         this.size = 0;
         this._values = [];
@@ -11699,7 +11614,7 @@ var MapPolyfill = /** @class */ (function () {
 
 var Map = _root.Map || (function () { return MapPolyfill; })();
 
-var FastMap = /** @class */ (function () {
+var FastMap = (function () {
     function FastMap() {
         this.values = {};
     }
@@ -11801,7 +11716,7 @@ function groupBy$1(keySelector, elementSelector, durationSelector, subjectSelect
         return source.lift(new GroupByOperator(keySelector, elementSelector, durationSelector, subjectSelector));
     };
 }
-var GroupByOperator = /** @class */ (function () {
+var GroupByOperator = (function () {
     function GroupByOperator(keySelector, elementSelector, durationSelector, subjectSelector) {
         this.keySelector = keySelector;
         this.elementSelector = elementSelector;
@@ -11818,18 +11733,17 @@ var GroupByOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var GroupBySubscriber = /** @class */ (function (_super) {
+var GroupBySubscriber = (function (_super) {
     __extends(GroupBySubscriber, _super);
     function GroupBySubscriber(destination, keySelector, elementSelector, durationSelector, subjectSelector) {
-        var _this = _super.call(this, destination) || this;
-        _this.keySelector = keySelector;
-        _this.elementSelector = elementSelector;
-        _this.durationSelector = durationSelector;
-        _this.subjectSelector = subjectSelector;
-        _this.groups = null;
-        _this.attemptedToUnsubscribe = false;
-        _this.count = 0;
-        return _this;
+        _super.call(this, destination);
+        this.keySelector = keySelector;
+        this.elementSelector = elementSelector;
+        this.durationSelector = durationSelector;
+        this.subjectSelector = subjectSelector;
+        this.groups = null;
+        this.attemptedToUnsubscribe = false;
+        this.count = 0;
     }
     GroupBySubscriber.prototype._next = function (value) {
         var key;
@@ -11919,14 +11833,13 @@ var GroupBySubscriber = /** @class */ (function (_super) {
  * @ignore
  * @extends {Ignored}
  */
-var GroupDurationSubscriber = /** @class */ (function (_super) {
+var GroupDurationSubscriber = (function (_super) {
     __extends(GroupDurationSubscriber, _super);
     function GroupDurationSubscriber(key, group, parent) {
-        var _this = _super.call(this, group) || this;
-        _this.key = key;
-        _this.group = group;
-        _this.parent = parent;
-        return _this;
+        _super.call(this, group);
+        this.key = key;
+        this.group = group;
+        this.parent = parent;
     }
     GroupDurationSubscriber.prototype._next = function (value) {
         this.complete();
@@ -11948,14 +11861,13 @@ var GroupDurationSubscriber = /** @class */ (function (_super) {
  *
  * @class GroupedObservable<K, T>
  */
-var GroupedObservable = /** @class */ (function (_super) {
+var GroupedObservable = (function (_super) {
     __extends(GroupedObservable, _super);
     function GroupedObservable(key, groupSubject, refCountSubscription) {
-        var _this = _super.call(this) || this;
-        _this.key = key;
-        _this.groupSubject = groupSubject;
-        _this.refCountSubscription = refCountSubscription;
-        return _this;
+        _super.call(this);
+        this.key = key;
+        this.groupSubject = groupSubject;
+        this.refCountSubscription = refCountSubscription;
     }
     GroupedObservable.prototype._subscribe = function (subscriber) {
         var subscription = new Subscription();
@@ -11973,13 +11885,12 @@ var GroupedObservable = /** @class */ (function (_super) {
  * @ignore
  * @extends {Ignored}
  */
-var InnerRefCountSubscription = /** @class */ (function (_super) {
+var InnerRefCountSubscription = (function (_super) {
     __extends(InnerRefCountSubscription, _super);
     function InnerRefCountSubscription(parent) {
-        var _this = _super.call(this) || this;
-        _this.parent = parent;
+        _super.call(this);
+        this.parent = parent;
         parent.count++;
-        return _this;
     }
     InnerRefCountSubscription.prototype.unsubscribe = function () {
         var parent = this.parent;
@@ -12083,7 +11994,7 @@ function ignoreElements$1() {
         return source.lift(new IgnoreElementsOperator());
     };
 }
-var IgnoreElementsOperator = /** @class */ (function () {
+var IgnoreElementsOperator = (function () {
     function IgnoreElementsOperator() {
     }
     IgnoreElementsOperator.prototype.call = function (subscriber, source) {
@@ -12096,10 +12007,10 @@ var IgnoreElementsOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var IgnoreElementsSubscriber = /** @class */ (function (_super) {
+var IgnoreElementsSubscriber = (function (_super) {
     __extends(IgnoreElementsSubscriber, _super);
     function IgnoreElementsSubscriber() {
-        return _super !== null && _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     IgnoreElementsSubscriber.prototype._next = function (unused) {
         noop();
@@ -12126,7 +12037,7 @@ Observable.prototype.ignoreElements = ignoreElements$$1;
 function isEmpty$1() {
     return function (source) { return source.lift(new IsEmptyOperator()); };
 }
-var IsEmptyOperator = /** @class */ (function () {
+var IsEmptyOperator = (function () {
     function IsEmptyOperator() {
     }
     IsEmptyOperator.prototype.call = function (observer, source) {
@@ -12139,10 +12050,10 @@ var IsEmptyOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var IsEmptySubscriber = /** @class */ (function (_super) {
+var IsEmptySubscriber = (function (_super) {
     __extends(IsEmptySubscriber, _super);
     function IsEmptySubscriber(destination) {
-        return _super.call(this, destination) || this;
+        _super.call(this, destination);
     }
     IsEmptySubscriber.prototype.notifyComplete = function (isEmpty) {
         var destination = this.destination;
@@ -12218,7 +12129,7 @@ function audit$1(durationSelector) {
         return source.lift(new AuditOperator(durationSelector));
     };
 }
-var AuditOperator = /** @class */ (function () {
+var AuditOperator = (function () {
     function AuditOperator(durationSelector) {
         this.durationSelector = durationSelector;
     }
@@ -12232,13 +12143,12 @@ var AuditOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var AuditSubscriber = /** @class */ (function (_super) {
+var AuditSubscriber = (function (_super) {
     __extends(AuditSubscriber, _super);
     function AuditSubscriber(destination, durationSelector) {
-        var _this = _super.call(this, destination) || this;
-        _this.durationSelector = durationSelector;
-        _this.hasValue = false;
-        return _this;
+        _super.call(this, destination);
+        this.durationSelector = durationSelector;
+        this.hasValue = false;
     }
     AuditSubscriber.prototype._next = function (value) {
         this.value = value;
@@ -12444,7 +12354,7 @@ Observable.prototype.auditTime = auditTime$$1;
 function last$1(predicate, resultSelector, defaultValue) {
     return function (source) { return source.lift(new LastOperator(predicate, resultSelector, defaultValue, source)); };
 }
-var LastOperator = /** @class */ (function () {
+var LastOperator = (function () {
     function LastOperator(predicate, resultSelector, defaultValue, source) {
         this.predicate = predicate;
         this.resultSelector = resultSelector;
@@ -12461,21 +12371,20 @@ var LastOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var LastSubscriber = /** @class */ (function (_super) {
+var LastSubscriber = (function (_super) {
     __extends(LastSubscriber, _super);
     function LastSubscriber(destination, predicate, resultSelector, defaultValue, source) {
-        var _this = _super.call(this, destination) || this;
-        _this.predicate = predicate;
-        _this.resultSelector = resultSelector;
-        _this.defaultValue = defaultValue;
-        _this.source = source;
-        _this.hasValue = false;
-        _this.index = 0;
+        _super.call(this, destination);
+        this.predicate = predicate;
+        this.resultSelector = resultSelector;
+        this.defaultValue = defaultValue;
+        this.source = source;
+        this.hasValue = false;
+        this.index = 0;
         if (typeof defaultValue !== 'undefined') {
-            _this.lastValue = defaultValue;
-            _this.hasValue = true;
+            this.lastValue = defaultValue;
+            this.hasValue = true;
         }
-        return _this;
     }
     LastSubscriber.prototype._next = function (value) {
         var index = this.index++;
@@ -12588,7 +12497,7 @@ Observable.prototype.letBind = letProto;
 function every$1(predicate, thisArg) {
     return function (source) { return source.lift(new EveryOperator(predicate, thisArg, source)); };
 }
-var EveryOperator = /** @class */ (function () {
+var EveryOperator = (function () {
     function EveryOperator(predicate, thisArg, source) {
         this.predicate = predicate;
         this.thisArg = thisArg;
@@ -12604,16 +12513,15 @@ var EveryOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var EverySubscriber = /** @class */ (function (_super) {
+var EverySubscriber = (function (_super) {
     __extends(EverySubscriber, _super);
     function EverySubscriber(destination, predicate, thisArg, source) {
-        var _this = _super.call(this, destination) || this;
-        _this.predicate = predicate;
-        _this.thisArg = thisArg;
-        _this.source = source;
-        _this.index = 0;
-        _this.thisArg = thisArg || _this;
-        return _this;
+        _super.call(this, destination);
+        this.predicate = predicate;
+        this.thisArg = thisArg;
+        this.source = source;
+        this.index = 0;
+        this.thisArg = thisArg || this;
     }
     EverySubscriber.prototype.notifyComplete = function (everyValueMatch) {
         this.destination.next(everyValueMatch);
@@ -12726,7 +12634,7 @@ Observable.prototype.map = map$1;
 function mapTo$1(value) {
     return function (source) { return source.lift(new MapToOperator(value)); };
 }
-var MapToOperator = /** @class */ (function () {
+var MapToOperator = (function () {
     function MapToOperator(value) {
         this.value = value;
     }
@@ -12740,12 +12648,11 @@ var MapToOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var MapToSubscriber = /** @class */ (function (_super) {
+var MapToSubscriber = (function (_super) {
     __extends(MapToSubscriber, _super);
     function MapToSubscriber(destination, value) {
-        var _this = _super.call(this, destination) || this;
-        _this.value = value;
-        return _this;
+        _super.call(this, destination);
+        this.value = value;
     }
     MapToSubscriber.prototype._next = function (x) {
         this.destination.next(this.value);
@@ -12834,7 +12741,7 @@ function materialize$1() {
         return source.lift(new MaterializeOperator());
     };
 }
-var MaterializeOperator = /** @class */ (function () {
+var MaterializeOperator = (function () {
     function MaterializeOperator() {
     }
     MaterializeOperator.prototype.call = function (subscriber, source) {
@@ -12847,10 +12754,10 @@ var MaterializeOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var MaterializeSubscriber = /** @class */ (function (_super) {
+var MaterializeSubscriber = (function (_super) {
     __extends(MaterializeSubscriber, _super);
     function MaterializeSubscriber(destination) {
-        return _super.call(this, destination) || this;
+        _super.call(this, destination);
     }
     MaterializeSubscriber.prototype._next = function (value) {
         this.destination.next(Notification.createNext(value));
@@ -12970,7 +12877,7 @@ function scan(accumulator, seed) {
         return source.lift(new ScanOperator(accumulator, seed, hasSeed));
     };
 }
-var ScanOperator = /** @class */ (function () {
+var ScanOperator = (function () {
     function ScanOperator(accumulator, seed, hasSeed) {
         if (hasSeed === void 0) { hasSeed = false; }
         this.accumulator = accumulator;
@@ -12987,15 +12894,14 @@ var ScanOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var ScanSubscriber = /** @class */ (function (_super) {
+var ScanSubscriber = (function (_super) {
     __extends(ScanSubscriber, _super);
     function ScanSubscriber(destination, accumulator, _seed, hasSeed) {
-        var _this = _super.call(this, destination) || this;
-        _this.accumulator = accumulator;
-        _this._seed = _seed;
-        _this.hasSeed = hasSeed;
-        _this.index = 0;
-        return _this;
+        _super.call(this, destination);
+        this.accumulator = accumulator;
+        this._seed = _seed;
+        this.hasSeed = hasSeed;
+        this.index = 0;
     }
     Object.defineProperty(ScanSubscriber.prototype, "seed", {
         get: function () {
@@ -13078,7 +12984,7 @@ function takeLast(count) {
         }
     };
 }
-var TakeLastOperator = /** @class */ (function () {
+var TakeLastOperator = (function () {
     function TakeLastOperator(total) {
         this.total = total;
         if (this.total < 0) {
@@ -13095,14 +13001,13 @@ var TakeLastOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var TakeLastSubscriber = /** @class */ (function (_super) {
+var TakeLastSubscriber = (function (_super) {
     __extends(TakeLastSubscriber, _super);
     function TakeLastSubscriber(destination, total) {
-        var _this = _super.call(this, destination) || this;
-        _this.total = total;
-        _this.ring = new Array();
-        _this.count = 0;
-        return _this;
+        _super.call(this, destination);
+        this.total = total;
+        this.ring = new Array();
+        this.count = 0;
     }
     TakeLastSubscriber.prototype._next = function (value) {
         var ring = this.ring;
@@ -13320,7 +13225,7 @@ Observable.prototype.max = max$$1;
 function merge$2() {
     var observables = [];
     for (var _i = 0; _i < arguments.length; _i++) {
-        observables[_i] = arguments[_i];
+        observables[_i - 0] = arguments[_i];
     }
     return function (source) { return source.lift.call(merge.apply(void 0, [source].concat(observables))); };
 }
@@ -13375,7 +13280,7 @@ function merge$2() {
 function merge$1() {
     var observables = [];
     for (var _i = 0; _i < arguments.length; _i++) {
-        observables[_i] = arguments[_i];
+        observables[_i - 0] = arguments[_i];
     }
     return merge$2.apply(void 0, observables)(this);
 }
@@ -13554,7 +13459,7 @@ function mergeMapTo$1(innerObservable, resultSelector, concurrent) {
 }
 // TODO: Figure out correct signature here: an Operator<Observable<T>, R>
 //       needs to implement call(observer: Subscriber<R>): Subscriber<Observable<T>>
-var MergeMapToOperator = /** @class */ (function () {
+var MergeMapToOperator = (function () {
     function MergeMapToOperator(ish, resultSelector, concurrent) {
         if (concurrent === void 0) { concurrent = Number.POSITIVE_INFINITY; }
         this.ish = ish;
@@ -13571,19 +13476,18 @@ var MergeMapToOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var MergeMapToSubscriber = /** @class */ (function (_super) {
+var MergeMapToSubscriber = (function (_super) {
     __extends(MergeMapToSubscriber, _super);
     function MergeMapToSubscriber(destination, ish, resultSelector, concurrent) {
         if (concurrent === void 0) { concurrent = Number.POSITIVE_INFINITY; }
-        var _this = _super.call(this, destination) || this;
-        _this.ish = ish;
-        _this.resultSelector = resultSelector;
-        _this.concurrent = concurrent;
-        _this.hasCompleted = false;
-        _this.buffer = [];
-        _this.active = 0;
-        _this.index = 0;
-        return _this;
+        _super.call(this, destination);
+        this.ish = ish;
+        this.resultSelector = resultSelector;
+        this.concurrent = concurrent;
+        this.hasCompleted = false;
+        this.buffer = [];
+        this.active = 0;
+        this.index = 0;
     }
     MergeMapToSubscriber.prototype._next = function (value) {
         if (this.active < this.concurrent) {
@@ -13732,7 +13636,7 @@ function mergeScan$1(accumulator, seed, concurrent) {
     if (concurrent === void 0) { concurrent = Number.POSITIVE_INFINITY; }
     return function (source) { return source.lift(new MergeScanOperator(accumulator, seed, concurrent)); };
 }
-var MergeScanOperator = /** @class */ (function () {
+var MergeScanOperator = (function () {
     function MergeScanOperator(accumulator, seed, concurrent) {
         this.accumulator = accumulator;
         this.seed = seed;
@@ -13748,19 +13652,18 @@ var MergeScanOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var MergeScanSubscriber = /** @class */ (function (_super) {
+var MergeScanSubscriber = (function (_super) {
     __extends(MergeScanSubscriber, _super);
     function MergeScanSubscriber(destination, accumulator, acc, concurrent) {
-        var _this = _super.call(this, destination) || this;
-        _this.accumulator = accumulator;
-        _this.acc = acc;
-        _this.concurrent = concurrent;
-        _this.hasValue = false;
-        _this.hasCompleted = false;
-        _this.buffer = [];
-        _this.active = 0;
-        _this.index = 0;
-        return _this;
+        _super.call(this, destination);
+        this.accumulator = accumulator;
+        this.acc = acc;
+        this.concurrent = concurrent;
+        this.hasValue = false;
+        this.hasCompleted = false;
+        this.buffer = [];
+        this.active = 0;
+        this.index = 0;
     }
     MergeScanSubscriber.prototype._next = function (value) {
         if (this.active < this.concurrent) {
@@ -13932,7 +13835,7 @@ function refCount() {
         return source.lift(new RefCountOperator$1(source));
     };
 }
-var RefCountOperator$1 = /** @class */ (function () {
+var RefCountOperator$1 = (function () {
     function RefCountOperator(connectable) {
         this.connectable = connectable;
     }
@@ -13948,12 +13851,11 @@ var RefCountOperator$1 = /** @class */ (function () {
     };
     return RefCountOperator;
 }());
-var RefCountSubscriber$1 = /** @class */ (function (_super) {
+var RefCountSubscriber$1 = (function (_super) {
     __extends(RefCountSubscriber, _super);
     function RefCountSubscriber(destination, connectable) {
-        var _this = _super.call(this, destination) || this;
-        _this.connectable = connectable;
-        return _this;
+        _super.call(this, destination);
+        this.connectable = connectable;
     }
     RefCountSubscriber.prototype._unsubscribe = function () {
         var connectable = this.connectable;
@@ -14008,15 +13910,14 @@ var RefCountSubscriber$1 = /** @class */ (function (_super) {
 /**
  * @class ConnectableObservable<T>
  */
-var ConnectableObservable = /** @class */ (function (_super) {
+var ConnectableObservable = (function (_super) {
     __extends(ConnectableObservable, _super);
     function ConnectableObservable(source, subjectFactory) {
-        var _this = _super.call(this) || this;
-        _this.source = source;
-        _this.subjectFactory = subjectFactory;
-        _this._refCount = 0;
-        _this._isComplete = false;
-        return _this;
+        _super.call(this);
+        this.source = source;
+        this.subjectFactory = subjectFactory;
+        this._refCount = 0;
+        this._isComplete = false;
     }
     ConnectableObservable.prototype._subscribe = function (subscriber) {
         return this.getSubject().subscribe(subscriber);
@@ -14062,12 +13963,11 @@ var connectableObservableDescriptor = {
     connect: { value: connectableProto.connect },
     refCount: { value: connectableProto.refCount }
 };
-var ConnectableSubscriber = /** @class */ (function (_super) {
+var ConnectableSubscriber = (function (_super) {
     __extends(ConnectableSubscriber, _super);
     function ConnectableSubscriber(destination, connectable) {
-        var _this = _super.call(this, destination) || this;
-        _this.connectable = connectable;
-        return _this;
+        _super.call(this, destination);
+        this.connectable = connectable;
     }
     ConnectableSubscriber.prototype._error = function (err) {
         this._unsubscribe();
@@ -14093,12 +13993,11 @@ var ConnectableSubscriber = /** @class */ (function (_super) {
     };
     return ConnectableSubscriber;
 }(SubjectSubscriber));
-var RefCountSubscriber = /** @class */ (function (_super) {
+var RefCountSubscriber = (function (_super) {
     __extends(RefCountSubscriber, _super);
     function RefCountSubscriber(destination, connectable) {
-        var _this = _super.call(this, destination) || this;
-        _this.connectable = connectable;
-        return _this;
+        _super.call(this, destination);
+        this.connectable = connectable;
     }
     RefCountSubscriber.prototype._unsubscribe = function () {
         var connectable = this.connectable;
@@ -14190,7 +14089,7 @@ function multicast$1(subjectOrSubjectFactory, selector) {
         return connectable;
     };
 }
-var MulticastOperator = /** @class */ (function () {
+var MulticastOperator = (function () {
     function MulticastOperator(subjectFactory, selector) {
         this.subjectFactory = subjectFactory;
         this.selector = selector;
@@ -14424,7 +14323,7 @@ Observable.prototype.observeOn = observeOn$1;
 function onErrorResumeNext$2() {
     var nextSources = [];
     for (var _i = 0; _i < arguments.length; _i++) {
-        nextSources[_i] = arguments[_i];
+        nextSources[_i - 0] = arguments[_i];
     }
     return onErrorResumeNext$1.apply(void 0, nextSources)(this);
 }
@@ -14469,7 +14368,7 @@ Observable.prototype.onErrorResumeNext = onErrorResumeNext$2;
 function pairwise$1() {
     return function (source) { return source.lift(new PairwiseOperator()); };
 }
-var PairwiseOperator = /** @class */ (function () {
+var PairwiseOperator = (function () {
     function PairwiseOperator() {
     }
     PairwiseOperator.prototype.call = function (subscriber, source) {
@@ -14482,12 +14381,11 @@ var PairwiseOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var PairwiseSubscriber = /** @class */ (function (_super) {
+var PairwiseSubscriber = (function (_super) {
     __extends(PairwiseSubscriber, _super);
     function PairwiseSubscriber(destination) {
-        var _this = _super.call(this, destination) || this;
-        _this.hasPrev = false;
-        return _this;
+        _super.call(this, destination);
+        this.hasPrev = false;
     }
     PairwiseSubscriber.prototype._next = function (value) {
         if (this.hasPrev) {
@@ -14675,7 +14573,7 @@ Observable.prototype.partition = partition$$1;
 function pluck$1() {
     var properties = [];
     for (var _i = 0; _i < arguments.length; _i++) {
-        properties[_i] = arguments[_i];
+        properties[_i - 0] = arguments[_i];
     }
     var length = properties.length;
     if (length === 0) {
@@ -14729,7 +14627,7 @@ function plucker(props, length) {
 function pluck$$1() {
     var properties = [];
     for (var _i = 0; _i < arguments.length; _i++) {
-        properties[_i] = arguments[_i];
+        properties[_i - 0] = arguments[_i];
     }
     return pluck$1.apply(void 0, properties)(this);
 }
@@ -14779,12 +14677,11 @@ Observable.prototype.publish = publish$$1;
 /**
  * @class BehaviorSubject<T>
  */
-var BehaviorSubject = /** @class */ (function (_super) {
+var BehaviorSubject = (function (_super) {
     __extends(BehaviorSubject, _super);
     function BehaviorSubject(_value) {
-        var _this = _super.call(this) || this;
-        _this._value = _value;
-        return _this;
+        _super.call(this);
+        this._value = _value;
     }
     Object.defineProperty(BehaviorSubject.prototype, "value", {
         get: function () {
@@ -14893,7 +14790,7 @@ Observable.prototype.publishLast = publishLast$$1;
 function race$2() {
     var observables = [];
     for (var _i = 0; _i < arguments.length; _i++) {
-        observables[_i] = arguments[_i];
+        observables[_i - 0] = arguments[_i];
     }
     return function raceOperatorFunction(source) {
         // if the only argument is an array, it was most likely called with
@@ -14917,7 +14814,7 @@ function race$2() {
 function race$1() {
     var observables = [];
     for (var _i = 0; _i < arguments.length; _i++) {
-        observables[_i] = arguments[_i];
+        observables[_i - 0] = arguments[_i];
     }
     return race$2.apply(void 0, observables)(this);
 }
@@ -15009,7 +14906,7 @@ function repeat$1(count) {
         }
     };
 }
-var RepeatOperator = /** @class */ (function () {
+var RepeatOperator = (function () {
     function RepeatOperator(count, source) {
         this.count = count;
         this.source = source;
@@ -15024,13 +14921,12 @@ var RepeatOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var RepeatSubscriber = /** @class */ (function (_super) {
+var RepeatSubscriber = (function (_super) {
     __extends(RepeatSubscriber, _super);
     function RepeatSubscriber(destination, count, source) {
-        var _this = _super.call(this, destination) || this;
-        _this.count = count;
-        _this.source = source;
-        return _this;
+        _super.call(this, destination);
+        this.count = count;
+        this.source = source;
     }
     RepeatSubscriber.prototype.complete = function () {
         if (!this.isStopped) {
@@ -15083,7 +14979,7 @@ Observable.prototype.repeat = repeat$$1;
 function repeatWhen$1(notifier) {
     return function (source) { return source.lift(new RepeatWhenOperator(notifier)); };
 }
-var RepeatWhenOperator = /** @class */ (function () {
+var RepeatWhenOperator = (function () {
     function RepeatWhenOperator(notifier) {
         this.notifier = notifier;
     }
@@ -15097,14 +14993,13 @@ var RepeatWhenOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var RepeatWhenSubscriber = /** @class */ (function (_super) {
+var RepeatWhenSubscriber = (function (_super) {
     __extends(RepeatWhenSubscriber, _super);
     function RepeatWhenSubscriber(destination, notifier, source) {
-        var _this = _super.call(this, destination) || this;
-        _this.notifier = notifier;
-        _this.source = source;
-        _this.sourceIsBeingSubscribedTo = true;
-        return _this;
+        _super.call(this, destination);
+        this.notifier = notifier;
+        this.source = source;
+        this.sourceIsBeingSubscribedTo = true;
     }
     RepeatWhenSubscriber.prototype.notifyNext = function (outerValue, innerValue, outerIndex, innerIndex, innerSub) {
         this.sourceIsBeingSubscribedTo = true;
@@ -15203,7 +15098,7 @@ function retry$1(count) {
     if (count === void 0) { count = -1; }
     return function (source) { return source.lift(new RetryOperator(count, source)); };
 }
-var RetryOperator = /** @class */ (function () {
+var RetryOperator = (function () {
     function RetryOperator(count, source) {
         this.count = count;
         this.source = source;
@@ -15218,13 +15113,12 @@ var RetryOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var RetrySubscriber = /** @class */ (function (_super) {
+var RetrySubscriber = (function (_super) {
     __extends(RetrySubscriber, _super);
     function RetrySubscriber(destination, count, source) {
-        var _this = _super.call(this, destination) || this;
-        _this.count = count;
-        _this.source = source;
-        return _this;
+        _super.call(this, destination);
+        this.count = count;
+        this.source = source;
     }
     RetrySubscriber.prototype.error = function (err) {
         if (!this.isStopped) {
@@ -15281,7 +15175,7 @@ Observable.prototype.retry = retry$$1;
 function retryWhen$1(notifier) {
     return function (source) { return source.lift(new RetryWhenOperator(notifier, source)); };
 }
-var RetryWhenOperator = /** @class */ (function () {
+var RetryWhenOperator = (function () {
     function RetryWhenOperator(notifier, source) {
         this.notifier = notifier;
         this.source = source;
@@ -15296,13 +15190,12 @@ var RetryWhenOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var RetryWhenSubscriber = /** @class */ (function (_super) {
+var RetryWhenSubscriber = (function (_super) {
     __extends(RetryWhenSubscriber, _super);
     function RetryWhenSubscriber(destination, notifier, source) {
-        var _this = _super.call(this, destination) || this;
-        _this.notifier = notifier;
-        _this.source = source;
-        return _this;
+        _super.call(this, destination);
+        this.notifier = notifier;
+        this.source = source;
     }
     RetryWhenSubscriber.prototype.error = function (err) {
         if (!this.isStopped) {
@@ -15411,7 +15304,7 @@ Observable.prototype.retryWhen = retryWhen$$1;
 function sample$1(notifier) {
     return function (source) { return source.lift(new SampleOperator(notifier)); };
 }
-var SampleOperator = /** @class */ (function () {
+var SampleOperator = (function () {
     function SampleOperator(notifier) {
         this.notifier = notifier;
     }
@@ -15428,12 +15321,11 @@ var SampleOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var SampleSubscriber = /** @class */ (function (_super) {
+var SampleSubscriber = (function (_super) {
     __extends(SampleSubscriber, _super);
     function SampleSubscriber() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.hasValue = false;
-        return _this;
+        _super.apply(this, arguments);
+        this.hasValue = false;
     }
     SampleSubscriber.prototype._next = function (value) {
         this.value = value;
@@ -15534,7 +15426,7 @@ function sampleTime$1(period, scheduler) {
     if (scheduler === void 0) { scheduler = async; }
     return function (source) { return source.lift(new SampleTimeOperator(period, scheduler)); };
 }
-var SampleTimeOperator = /** @class */ (function () {
+var SampleTimeOperator = (function () {
     function SampleTimeOperator(period, scheduler) {
         this.period = period;
         this.scheduler = scheduler;
@@ -15549,15 +15441,14 @@ var SampleTimeOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var SampleTimeSubscriber = /** @class */ (function (_super) {
+var SampleTimeSubscriber = (function (_super) {
     __extends(SampleTimeSubscriber, _super);
     function SampleTimeSubscriber(destination, period, scheduler) {
-        var _this = _super.call(this, destination) || this;
-        _this.period = period;
-        _this.scheduler = scheduler;
-        _this.hasValue = false;
-        _this.add(scheduler.schedule(dispatchNotification, period, { subscriber: _this, period: period }));
-        return _this;
+        _super.call(this, destination);
+        this.period = period;
+        this.scheduler = scheduler;
+        this.hasValue = false;
+        this.add(scheduler.schedule(dispatchNotification, period, { subscriber: this, period: period }));
     }
     SampleTimeSubscriber.prototype._next = function (value) {
         this.lastValue = value;
@@ -15722,7 +15613,7 @@ Observable.prototype.scan = scan$1;
 function sequenceEqual$1(compareTo, comparor) {
     return function (source) { return source.lift(new SequenceEqualOperator(compareTo, comparor)); };
 }
-var SequenceEqualOperator = /** @class */ (function () {
+var SequenceEqualOperator = (function () {
     function SequenceEqualOperator(compareTo, comparor) {
         this.compareTo = compareTo;
         this.comparor = comparor;
@@ -15737,17 +15628,16 @@ var SequenceEqualOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var SequenceEqualSubscriber = /** @class */ (function (_super) {
+var SequenceEqualSubscriber = (function (_super) {
     __extends(SequenceEqualSubscriber, _super);
     function SequenceEqualSubscriber(destination, compareTo, comparor) {
-        var _this = _super.call(this, destination) || this;
-        _this.compareTo = compareTo;
-        _this.comparor = comparor;
-        _this._a = [];
-        _this._b = [];
-        _this._oneComplete = false;
-        _this.add(compareTo.subscribe(new SequenceEqualCompareToSubscriber(destination, _this)));
-        return _this;
+        _super.call(this, destination);
+        this.compareTo = compareTo;
+        this.comparor = comparor;
+        this._a = [];
+        this._b = [];
+        this._oneComplete = false;
+        this.add(compareTo.subscribe(new SequenceEqualCompareToSubscriber(destination, this)));
     }
     SequenceEqualSubscriber.prototype._next = function (value) {
         if (this._oneComplete && this._b.length === 0) {
@@ -15802,12 +15692,11 @@ var SequenceEqualSubscriber = /** @class */ (function (_super) {
     };
     return SequenceEqualSubscriber;
 }(Subscriber));
-var SequenceEqualCompareToSubscriber = /** @class */ (function (_super) {
+var SequenceEqualCompareToSubscriber = (function (_super) {
     __extends(SequenceEqualCompareToSubscriber, _super);
     function SequenceEqualCompareToSubscriber(destination, parent) {
-        var _this = _super.call(this, destination) || this;
-        _this.parent = parent;
-        return _this;
+        _super.call(this, destination);
+        this.parent = parent;
     }
     SequenceEqualCompareToSubscriber.prototype._next = function (value) {
         this.parent.nextB(value);
@@ -15990,7 +15879,7 @@ Observable.prototype.shareReplay = shareReplay$$1;
 function single$1(predicate) {
     return function (source) { return source.lift(new SingleOperator(predicate, source)); };
 }
-var SingleOperator = /** @class */ (function () {
+var SingleOperator = (function () {
     function SingleOperator(predicate, source) {
         this.predicate = predicate;
         this.source = source;
@@ -16005,15 +15894,14 @@ var SingleOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var SingleSubscriber = /** @class */ (function (_super) {
+var SingleSubscriber = (function (_super) {
     __extends(SingleSubscriber, _super);
     function SingleSubscriber(destination, predicate, source) {
-        var _this = _super.call(this, destination) || this;
-        _this.predicate = predicate;
-        _this.source = source;
-        _this.seenValue = false;
-        _this.index = 0;
-        return _this;
+        _super.call(this, destination);
+        this.predicate = predicate;
+        this.source = source;
+        this.seenValue = false;
+        this.index = 0;
     }
     SingleSubscriber.prototype.applySingleValue = function (value) {
         if (this.seenValue) {
@@ -16092,7 +15980,7 @@ Observable.prototype.single = single$$1;
 function skip$1(count) {
     return function (source) { return source.lift(new SkipOperator(count)); };
 }
-var SkipOperator = /** @class */ (function () {
+var SkipOperator = (function () {
     function SkipOperator(total) {
         this.total = total;
     }
@@ -16106,13 +15994,12 @@ var SkipOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var SkipSubscriber = /** @class */ (function (_super) {
+var SkipSubscriber = (function (_super) {
     __extends(SkipSubscriber, _super);
     function SkipSubscriber(destination, total) {
-        var _this = _super.call(this, destination) || this;
-        _this.total = total;
-        _this.count = 0;
-        return _this;
+        _super.call(this, destination);
+        this.total = total;
+        this.count = 0;
     }
     SkipSubscriber.prototype._next = function (x) {
         if (++this.count > this.total) {
@@ -16174,7 +16061,7 @@ Observable.prototype.skip = skip$$1;
 function skipLast$1(count) {
     return function (source) { return source.lift(new SkipLastOperator(count)); };
 }
-var SkipLastOperator = /** @class */ (function () {
+var SkipLastOperator = (function () {
     function SkipLastOperator(_skipCount) {
         this._skipCount = _skipCount;
         if (this._skipCount < 0) {
@@ -16198,14 +16085,13 @@ var SkipLastOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var SkipLastSubscriber = /** @class */ (function (_super) {
+var SkipLastSubscriber = (function (_super) {
     __extends(SkipLastSubscriber, _super);
     function SkipLastSubscriber(destination, _skipCount) {
-        var _this = _super.call(this, destination) || this;
-        _this._skipCount = _skipCount;
-        _this._count = 0;
-        _this._ring = new Array(_skipCount);
-        return _this;
+        _super.call(this, destination);
+        this._skipCount = _skipCount;
+        this._count = 0;
+        this._ring = new Array(_skipCount);
     }
     SkipLastSubscriber.prototype._next = function (value) {
         var skipCount = this._skipCount;
@@ -16277,7 +16163,7 @@ Observable.prototype.skipLast = skipLast$$1;
 function skipUntil$1(notifier) {
     return function (source) { return source.lift(new SkipUntilOperator(notifier)); };
 }
-var SkipUntilOperator = /** @class */ (function () {
+var SkipUntilOperator = (function () {
     function SkipUntilOperator(notifier) {
         this.notifier = notifier;
     }
@@ -16291,14 +16177,13 @@ var SkipUntilOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var SkipUntilSubscriber = /** @class */ (function (_super) {
+var SkipUntilSubscriber = (function (_super) {
     __extends(SkipUntilSubscriber, _super);
     function SkipUntilSubscriber(destination, notifier) {
-        var _this = _super.call(this, destination) || this;
-        _this.hasValue = false;
-        _this.isInnerStopped = false;
-        _this.add(subscribeToResult(_this, notifier));
-        return _this;
+        _super.call(this, destination);
+        this.hasValue = false;
+        this.isInnerStopped = false;
+        this.add(subscribeToResult(this, notifier));
     }
     SkipUntilSubscriber.prototype._next = function (value) {
         if (this.hasValue) {
@@ -16358,7 +16243,7 @@ Observable.prototype.skipUntil = skipUntil$$1;
 function skipWhile$1(predicate) {
     return function (source) { return source.lift(new SkipWhileOperator(predicate)); };
 }
-var SkipWhileOperator = /** @class */ (function () {
+var SkipWhileOperator = (function () {
     function SkipWhileOperator(predicate) {
         this.predicate = predicate;
     }
@@ -16372,14 +16257,13 @@ var SkipWhileOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var SkipWhileSubscriber = /** @class */ (function (_super) {
+var SkipWhileSubscriber = (function (_super) {
     __extends(SkipWhileSubscriber, _super);
     function SkipWhileSubscriber(destination, predicate) {
-        var _this = _super.call(this, destination) || this;
-        _this.predicate = predicate;
-        _this.skipping = true;
-        _this.index = 0;
-        return _this;
+        _super.call(this, destination);
+        this.predicate = predicate;
+        this.skipping = true;
+        this.index = 0;
     }
     SkipWhileSubscriber.prototype._next = function (value) {
         var destination = this.destination;
@@ -16438,7 +16322,7 @@ Observable.prototype.skipWhile = skipWhile$$1;
 function startWith$1() {
     var array = [];
     for (var _i = 0; _i < arguments.length; _i++) {
-        array[_i] = arguments[_i];
+        array[_i - 0] = arguments[_i];
     }
     return function (source) {
         var scheduler = array[array.length - 1];
@@ -16479,7 +16363,7 @@ function startWith$1() {
 function startWith$$1() {
     var array = [];
     for (var _i = 0; _i < arguments.length; _i++) {
-        array[_i] = arguments[_i];
+        array[_i - 0] = arguments[_i];
     }
     return startWith$1.apply(void 0, array)(this);
 }
@@ -16489,7 +16373,7 @@ Observable.prototype.startWith = startWith$$1;
 /**
 Some credit for this helper goes to http://github.com/YuzuJS/setImmediate
 */
-var ImmediateDefinition = /** @class */ (function () {
+var ImmediateDefinition = (function () {
     function ImmediateDefinition(root$$1) {
         this.root = root$$1;
         if (root$$1.setImmediate && typeof root$$1.setImmediate === 'function') {
@@ -16697,13 +16581,12 @@ var Immediate = new ImmediateDefinition(_root);
  * @ignore
  * @extends {Ignored}
  */
-var AsapAction = /** @class */ (function (_super) {
+var AsapAction = (function (_super) {
     __extends(AsapAction, _super);
     function AsapAction(scheduler, work) {
-        var _this = _super.call(this, scheduler, work) || this;
-        _this.scheduler = scheduler;
-        _this.work = work;
-        return _this;
+        _super.call(this, scheduler, work);
+        this.scheduler = scheduler;
+        this.work = work;
     }
     AsapAction.prototype.requestAsyncId = function (scheduler, id, delay) {
         if (delay === void 0) { delay = 0; }
@@ -16739,10 +16622,10 @@ var AsapAction = /** @class */ (function (_super) {
     return AsapAction;
 }(AsyncAction));
 
-var AsapScheduler = /** @class */ (function (_super) {
+var AsapScheduler = (function (_super) {
     __extends(AsapScheduler, _super);
     function AsapScheduler() {
-        return _super !== null && _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     AsapScheduler.prototype.flush = function (action) {
         this.active = true;
@@ -16809,22 +16692,21 @@ var asap = new AsapScheduler(AsapAction);
  * @extends {Ignored}
  * @hide true
  */
-var SubscribeOnObservable = /** @class */ (function (_super) {
+var SubscribeOnObservable = (function (_super) {
     __extends(SubscribeOnObservable, _super);
     function SubscribeOnObservable(source, delayTime, scheduler) {
         if (delayTime === void 0) { delayTime = 0; }
         if (scheduler === void 0) { scheduler = asap; }
-        var _this = _super.call(this) || this;
-        _this.source = source;
-        _this.delayTime = delayTime;
-        _this.scheduler = scheduler;
+        _super.call(this);
+        this.source = source;
+        this.delayTime = delayTime;
+        this.scheduler = scheduler;
         if (!isNumeric(delayTime) || delayTime < 0) {
-            _this.delayTime = 0;
+            this.delayTime = 0;
         }
         if (!scheduler || typeof scheduler.schedule !== 'function') {
-            _this.scheduler = asap;
+            this.scheduler = asap;
         }
-        return _this;
     }
     SubscribeOnObservable.create = function (source, delay, scheduler) {
         if (delay === void 0) { delay = 0; }
@@ -16863,7 +16745,7 @@ function subscribeOn$1(scheduler, delay) {
         return source.lift(new SubscribeOnOperator(scheduler, delay));
     };
 }
-var SubscribeOnOperator = /** @class */ (function () {
+var SubscribeOnOperator = (function () {
     function SubscribeOnOperator(scheduler, delay) {
         this.scheduler = scheduler;
         this.delay = delay;
@@ -16945,7 +16827,7 @@ function switchMap(project, resultSelector) {
         return source.lift(new SwitchMapOperator(project, resultSelector));
     };
 }
-var SwitchMapOperator = /** @class */ (function () {
+var SwitchMapOperator = (function () {
     function SwitchMapOperator(project, resultSelector) {
         this.project = project;
         this.resultSelector = resultSelector;
@@ -16960,14 +16842,13 @@ var SwitchMapOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var SwitchMapSubscriber = /** @class */ (function (_super) {
+var SwitchMapSubscriber = (function (_super) {
     __extends(SwitchMapSubscriber, _super);
     function SwitchMapSubscriber(destination, project, resultSelector) {
-        var _this = _super.call(this, destination) || this;
-        _this.project = project;
-        _this.resultSelector = resultSelector;
-        _this.index = 0;
-        return _this;
+        _super.call(this, destination);
+        this.project = project;
+        this.resultSelector = resultSelector;
+        this.index = 0;
     }
     SwitchMapSubscriber.prototype._next = function (value) {
         var result;
@@ -17179,7 +17060,7 @@ Observable.prototype.switchMap = switchMap$1;
 function switchMapTo$1(innerObservable, resultSelector) {
     return function (source) { return source.lift(new SwitchMapToOperator(innerObservable, resultSelector)); };
 }
-var SwitchMapToOperator = /** @class */ (function () {
+var SwitchMapToOperator = (function () {
     function SwitchMapToOperator(observable, resultSelector) {
         this.observable = observable;
         this.resultSelector = resultSelector;
@@ -17194,14 +17075,13 @@ var SwitchMapToOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var SwitchMapToSubscriber = /** @class */ (function (_super) {
+var SwitchMapToSubscriber = (function (_super) {
     __extends(SwitchMapToSubscriber, _super);
     function SwitchMapToSubscriber(destination, inner, resultSelector) {
-        var _this = _super.call(this, destination) || this;
-        _this.inner = inner;
-        _this.resultSelector = resultSelector;
-        _this.index = 0;
-        return _this;
+        _super.call(this, destination);
+        this.inner = inner;
+        this.resultSelector = resultSelector;
+        this.index = 0;
     }
     SwitchMapToSubscriber.prototype._next = function (value) {
         var innerSubscription = this.innerSubscription;
@@ -17342,7 +17222,7 @@ function take$1(count) {
         }
     };
 }
-var TakeOperator = /** @class */ (function () {
+var TakeOperator = (function () {
     function TakeOperator(total) {
         this.total = total;
         if (this.total < 0) {
@@ -17359,13 +17239,12 @@ var TakeOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var TakeSubscriber = /** @class */ (function (_super) {
+var TakeSubscriber = (function (_super) {
     __extends(TakeSubscriber, _super);
     function TakeSubscriber(destination, total) {
-        var _this = _super.call(this, destination) || this;
-        _this.total = total;
-        _this.count = 0;
-        return _this;
+        _super.call(this, destination);
+        this.total = total;
+        this.count = 0;
     }
     TakeSubscriber.prototype._next = function (value) {
         var total = this.total;
@@ -17498,7 +17377,7 @@ Observable.prototype.takeLast = takeLast$1;
 function takeUntil$1(notifier) {
     return function (source) { return source.lift(new TakeUntilOperator(notifier)); };
 }
-var TakeUntilOperator = /** @class */ (function () {
+var TakeUntilOperator = (function () {
     function TakeUntilOperator(notifier) {
         this.notifier = notifier;
     }
@@ -17512,13 +17391,12 @@ var TakeUntilOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var TakeUntilSubscriber = /** @class */ (function (_super) {
+var TakeUntilSubscriber = (function (_super) {
     __extends(TakeUntilSubscriber, _super);
     function TakeUntilSubscriber(destination, notifier) {
-        var _this = _super.call(this, destination) || this;
-        _this.notifier = notifier;
-        _this.add(subscribeToResult(_this, notifier));
-        return _this;
+        _super.call(this, destination);
+        this.notifier = notifier;
+        this.add(subscribeToResult(this, notifier));
     }
     TakeUntilSubscriber.prototype.notifyNext = function (outerValue, innerValue, outerIndex, innerIndex, innerSub) {
         this.complete();
@@ -17607,7 +17485,7 @@ Observable.prototype.takeUntil = takeUntil$$1;
 function takeWhile$1(predicate) {
     return function (source) { return source.lift(new TakeWhileOperator(predicate)); };
 }
-var TakeWhileOperator = /** @class */ (function () {
+var TakeWhileOperator = (function () {
     function TakeWhileOperator(predicate) {
         this.predicate = predicate;
     }
@@ -17621,13 +17499,12 @@ var TakeWhileOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var TakeWhileSubscriber = /** @class */ (function (_super) {
+var TakeWhileSubscriber = (function (_super) {
     __extends(TakeWhileSubscriber, _super);
     function TakeWhileSubscriber(destination, predicate) {
-        var _this = _super.call(this, destination) || this;
-        _this.predicate = predicate;
-        _this.index = 0;
-        return _this;
+        _super.call(this, destination);
+        this.predicate = predicate;
+        this.index = 0;
     }
     TakeWhileSubscriber.prototype._next = function (value) {
         var destination = this.destination;
@@ -17743,7 +17620,7 @@ function throttle$1(durationSelector, config) {
     if (config === void 0) { config = defaultThrottleConfig; }
     return function (source) { return source.lift(new ThrottleOperator(durationSelector, config.leading, config.trailing)); };
 }
-var ThrottleOperator = /** @class */ (function () {
+var ThrottleOperator = (function () {
     function ThrottleOperator(durationSelector, leading, trailing) {
         this.durationSelector = durationSelector;
         this.leading = leading;
@@ -17759,16 +17636,15 @@ var ThrottleOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var ThrottleSubscriber = /** @class */ (function (_super) {
+var ThrottleSubscriber = (function (_super) {
     __extends(ThrottleSubscriber, _super);
     function ThrottleSubscriber(destination, durationSelector, _leading, _trailing) {
-        var _this = _super.call(this, destination) || this;
-        _this.destination = destination;
-        _this.durationSelector = durationSelector;
-        _this._leading = _leading;
-        _this._trailing = _trailing;
-        _this._hasTrailingValue = false;
-        return _this;
+        _super.call(this, destination);
+        this.destination = destination;
+        this.durationSelector = durationSelector;
+        this._leading = _leading;
+        this._trailing = _trailing;
+        this._hasTrailingValue = false;
     }
     ThrottleSubscriber.prototype._next = function (value) {
         if (this.throttled) {
@@ -17920,7 +17796,7 @@ function throttleTime$1(duration, scheduler, config) {
     if (config === void 0) { config = defaultThrottleConfig; }
     return function (source) { return source.lift(new ThrottleTimeOperator(duration, scheduler, config.leading, config.trailing)); };
 }
-var ThrottleTimeOperator = /** @class */ (function () {
+var ThrottleTimeOperator = (function () {
     function ThrottleTimeOperator(duration, scheduler, leading, trailing) {
         this.duration = duration;
         this.scheduler = scheduler;
@@ -17937,17 +17813,16 @@ var ThrottleTimeOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var ThrottleTimeSubscriber = /** @class */ (function (_super) {
+var ThrottleTimeSubscriber = (function (_super) {
     __extends(ThrottleTimeSubscriber, _super);
     function ThrottleTimeSubscriber(destination, duration, scheduler, leading, trailing) {
-        var _this = _super.call(this, destination) || this;
-        _this.duration = duration;
-        _this.scheduler = scheduler;
-        _this.leading = leading;
-        _this.trailing = trailing;
-        _this._hasTrailingValue = false;
-        _this._trailingValue = null;
-        return _this;
+        _super.call(this, destination);
+        this.duration = duration;
+        this.scheduler = scheduler;
+        this.leading = leading;
+        this.trailing = trailing;
+        this._hasTrailingValue = false;
+        this._trailingValue = null;
     }
     ThrottleTimeSubscriber.prototype._next = function (value) {
         if (this.throttled) {
@@ -18034,7 +17909,7 @@ function timeInterval$1(scheduler) {
     if (scheduler === void 0) { scheduler = async; }
     return function (source) { return source.lift(new TimeIntervalOperator(scheduler)); };
 }
-var TimeInterval = /** @class */ (function () {
+var TimeInterval = (function () {
     function TimeInterval(value, interval) {
         this.value = value;
         this.interval = interval;
@@ -18042,7 +17917,7 @@ var TimeInterval = /** @class */ (function () {
     return TimeInterval;
 }());
 
-var TimeIntervalOperator = /** @class */ (function () {
+var TimeIntervalOperator = (function () {
     function TimeIntervalOperator(scheduler) {
         this.scheduler = scheduler;
     }
@@ -18056,14 +17931,13 @@ var TimeIntervalOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var TimeIntervalSubscriber = /** @class */ (function (_super) {
+var TimeIntervalSubscriber = (function (_super) {
     __extends(TimeIntervalSubscriber, _super);
     function TimeIntervalSubscriber(destination, scheduler) {
-        var _this = _super.call(this, destination) || this;
-        _this.scheduler = scheduler;
-        _this.lastTime = 0;
-        _this.lastTime = scheduler.now();
-        return _this;
+        _super.call(this, destination);
+        this.scheduler = scheduler;
+        this.lastTime = 0;
+        this.lastTime = scheduler.now();
     }
     TimeIntervalSubscriber.prototype._next = function (value) {
         var now = this.scheduler.now();
@@ -18094,15 +17968,13 @@ Observable.prototype.timeInterval = timeInterval$$1;
  *
  * @class TimeoutError
  */
-var TimeoutError = /** @class */ (function (_super) {
+var TimeoutError = (function (_super) {
     __extends(TimeoutError, _super);
     function TimeoutError() {
-        var _this = this;
-        var err = _this = _super.call(this, 'Timeout has occurred') || this;
-        _this.name = err.name = 'TimeoutError';
-        _this.stack = err.stack;
-        _this.message = err.message;
-        return _this;
+        var err = _super.call(this, 'Timeout has occurred');
+        this.name = err.name = 'TimeoutError';
+        this.stack = err.stack;
+        this.message = err.message;
     }
     return TimeoutError;
 }(Error));
@@ -18178,7 +18050,7 @@ function timeout$1(due, scheduler) {
     var waitFor = absoluteTimeout ? (+due - scheduler.now()) : Math.abs(due);
     return function (source) { return source.lift(new TimeoutOperator(waitFor, absoluteTimeout, scheduler, new TimeoutError())); };
 }
-var TimeoutOperator = /** @class */ (function () {
+var TimeoutOperator = (function () {
     function TimeoutOperator(waitFor, absoluteTimeout, scheduler, errorInstance) {
         this.waitFor = waitFor;
         this.absoluteTimeout = absoluteTimeout;
@@ -18195,17 +18067,16 @@ var TimeoutOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var TimeoutSubscriber = /** @class */ (function (_super) {
+var TimeoutSubscriber = (function (_super) {
     __extends(TimeoutSubscriber, _super);
     function TimeoutSubscriber(destination, absoluteTimeout, waitFor, scheduler, errorInstance) {
-        var _this = _super.call(this, destination) || this;
-        _this.absoluteTimeout = absoluteTimeout;
-        _this.waitFor = waitFor;
-        _this.scheduler = scheduler;
-        _this.errorInstance = errorInstance;
-        _this.action = null;
-        _this.scheduleTimeout();
-        return _this;
+        _super.call(this, destination);
+        this.absoluteTimeout = absoluteTimeout;
+        this.waitFor = waitFor;
+        this.scheduler = scheduler;
+        this.errorInstance = errorInstance;
+        this.action = null;
+        this.scheduleTimeout();
     }
     TimeoutSubscriber.dispatchTimeout = function (subscriber) {
         subscriber.error(subscriber.errorInstance);
@@ -18366,7 +18237,7 @@ function timeoutWith$1(due, withObservable, scheduler) {
         return source.lift(new TimeoutWithOperator(waitFor, absoluteTimeout, withObservable, scheduler));
     };
 }
-var TimeoutWithOperator = /** @class */ (function () {
+var TimeoutWithOperator = (function () {
     function TimeoutWithOperator(waitFor, absoluteTimeout, withObservable, scheduler) {
         this.waitFor = waitFor;
         this.absoluteTimeout = absoluteTimeout;
@@ -18383,17 +18254,16 @@ var TimeoutWithOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var TimeoutWithSubscriber = /** @class */ (function (_super) {
+var TimeoutWithSubscriber = (function (_super) {
     __extends(TimeoutWithSubscriber, _super);
     function TimeoutWithSubscriber(destination, absoluteTimeout, waitFor, withObservable, scheduler) {
-        var _this = _super.call(this, destination) || this;
-        _this.absoluteTimeout = absoluteTimeout;
-        _this.waitFor = waitFor;
-        _this.withObservable = withObservable;
-        _this.scheduler = scheduler;
-        _this.action = null;
-        _this.scheduleTimeout();
-        return _this;
+        _super.call(this, destination);
+        this.absoluteTimeout = absoluteTimeout;
+        this.waitFor = waitFor;
+        this.withObservable = withObservable;
+        this.scheduler = scheduler;
+        this.action = null;
+        this.scheduleTimeout();
     }
     TimeoutWithSubscriber.dispatchTimeout = function (subscriber) {
         var withObservable = subscriber.withObservable;
@@ -18494,7 +18364,7 @@ function timestamp$1(scheduler) {
     return map(function (value) { return new Timestamp(value, scheduler.now()); });
     // return (source: Observable<T>) => source.lift(new TimestampOperator(scheduler));
 }
-var Timestamp = /** @class */ (function () {
+var Timestamp = (function () {
     function Timestamp(value, timestamp) {
         this.value = value;
         this.timestamp = timestamp;
@@ -18596,7 +18466,7 @@ function window$2(windowBoundaries) {
         return source.lift(new WindowOperator(windowBoundaries));
     };
 }
-var WindowOperator = /** @class */ (function () {
+var WindowOperator = (function () {
     function WindowOperator(windowBoundaries) {
         this.windowBoundaries = windowBoundaries;
     }
@@ -18615,13 +18485,12 @@ var WindowOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var WindowSubscriber = /** @class */ (function (_super) {
+var WindowSubscriber = (function (_super) {
     __extends(WindowSubscriber, _super);
     function WindowSubscriber(destination) {
-        var _this = _super.call(this, destination) || this;
-        _this.window = new Subject();
-        destination.next(_this.window);
-        return _this;
+        _super.call(this, destination);
+        this.window = new Subject();
+        destination.next(this.window);
     }
     WindowSubscriber.prototype.notifyNext = function (outerValue, innerValue, outerIndex, innerIndex, innerSub) {
         this.openWindow();
@@ -18754,7 +18623,7 @@ function windowCount$1(windowSize, startWindowEvery) {
         return source.lift(new WindowCountOperator(windowSize, startWindowEvery));
     };
 }
-var WindowCountOperator = /** @class */ (function () {
+var WindowCountOperator = (function () {
     function WindowCountOperator(windowSize, startWindowEvery) {
         this.windowSize = windowSize;
         this.startWindowEvery = startWindowEvery;
@@ -18769,17 +18638,16 @@ var WindowCountOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var WindowCountSubscriber = /** @class */ (function (_super) {
+var WindowCountSubscriber = (function (_super) {
     __extends(WindowCountSubscriber, _super);
     function WindowCountSubscriber(destination, windowSize, startWindowEvery) {
-        var _this = _super.call(this, destination) || this;
-        _this.destination = destination;
-        _this.windowSize = windowSize;
-        _this.startWindowEvery = startWindowEvery;
-        _this.windows = [new Subject()];
-        _this.count = 0;
-        destination.next(_this.windows[0]);
-        return _this;
+        _super.call(this, destination);
+        this.destination = destination;
+        this.windowSize = windowSize;
+        this.startWindowEvery = startWindowEvery;
+        this.windows = [new Subject()];
+        this.count = 0;
+        destination.next(this.windows[0]);
     }
     WindowCountSubscriber.prototype._next = function (value) {
         var startWindowEvery = (this.startWindowEvery > 0) ? this.startWindowEvery : this.windowSize;
@@ -18903,7 +18771,7 @@ function windowTime$1(windowTimeSpan) {
         return source.lift(new WindowTimeOperator(windowTimeSpan, windowCreationInterval, maxWindowSize, scheduler));
     };
 }
-var WindowTimeOperator = /** @class */ (function () {
+var WindowTimeOperator = (function () {
     function WindowTimeOperator(windowTimeSpan, windowCreationInterval, maxWindowSize, scheduler) {
         this.windowTimeSpan = windowTimeSpan;
         this.windowCreationInterval = windowCreationInterval;
@@ -18915,12 +18783,11 @@ var WindowTimeOperator = /** @class */ (function () {
     };
     return WindowTimeOperator;
 }());
-var CountedSubject = /** @class */ (function (_super) {
+var CountedSubject = (function (_super) {
     __extends(CountedSubject, _super);
     function CountedSubject() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this._numberOfNextedValues = 0;
-        return _this;
+        _super.apply(this, arguments);
+        this._numberOfNextedValues = 0;
     }
     CountedSubject.prototype.next = function (value) {
         this._numberOfNextedValues++;
@@ -18940,28 +18807,27 @@ var CountedSubject = /** @class */ (function (_super) {
  * @ignore
  * @extends {Ignored}
  */
-var WindowTimeSubscriber = /** @class */ (function (_super) {
+var WindowTimeSubscriber = (function (_super) {
     __extends(WindowTimeSubscriber, _super);
     function WindowTimeSubscriber(destination, windowTimeSpan, windowCreationInterval, maxWindowSize, scheduler) {
-        var _this = _super.call(this, destination) || this;
-        _this.destination = destination;
-        _this.windowTimeSpan = windowTimeSpan;
-        _this.windowCreationInterval = windowCreationInterval;
-        _this.maxWindowSize = maxWindowSize;
-        _this.scheduler = scheduler;
-        _this.windows = [];
-        var window = _this.openWindow();
+        _super.call(this, destination);
+        this.destination = destination;
+        this.windowTimeSpan = windowTimeSpan;
+        this.windowCreationInterval = windowCreationInterval;
+        this.maxWindowSize = maxWindowSize;
+        this.scheduler = scheduler;
+        this.windows = [];
+        var window = this.openWindow();
         if (windowCreationInterval !== null && windowCreationInterval >= 0) {
-            var closeState = { subscriber: _this, window: window, context: null };
-            var creationState = { windowTimeSpan: windowTimeSpan, windowCreationInterval: windowCreationInterval, subscriber: _this, scheduler: scheduler };
-            _this.add(scheduler.schedule(dispatchWindowClose, windowTimeSpan, closeState));
-            _this.add(scheduler.schedule(dispatchWindowCreation, windowCreationInterval, creationState));
+            var closeState = { subscriber: this, window: window, context: null };
+            var creationState = { windowTimeSpan: windowTimeSpan, windowCreationInterval: windowCreationInterval, subscriber: this, scheduler: scheduler };
+            this.add(scheduler.schedule(dispatchWindowClose, windowTimeSpan, closeState));
+            this.add(scheduler.schedule(dispatchWindowCreation, windowCreationInterval, creationState));
         }
         else {
-            var timeSpanOnlyState = { subscriber: _this, window: window, windowTimeSpan: windowTimeSpan };
-            _this.add(scheduler.schedule(dispatchWindowTimeSpanOnly, windowTimeSpan, timeSpanOnlyState));
+            var timeSpanOnlyState = { subscriber: this, window: window, windowTimeSpan: windowTimeSpan };
+            this.add(scheduler.schedule(dispatchWindowTimeSpanOnly, windowTimeSpan, timeSpanOnlyState));
         }
-        return _this;
     }
     WindowTimeSubscriber.prototype._next = function (value) {
         var windows = this.windows;
@@ -19101,7 +18967,7 @@ Observable.prototype.windowTime = windowTime$$1;
 function windowToggle$1(openings, closingSelector) {
     return function (source) { return source.lift(new WindowToggleOperator(openings, closingSelector)); };
 }
-var WindowToggleOperator = /** @class */ (function () {
+var WindowToggleOperator = (function () {
     function WindowToggleOperator(openings, closingSelector) {
         this.openings = openings;
         this.closingSelector = closingSelector;
@@ -19116,15 +18982,14 @@ var WindowToggleOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var WindowToggleSubscriber = /** @class */ (function (_super) {
+var WindowToggleSubscriber = (function (_super) {
     __extends(WindowToggleSubscriber, _super);
     function WindowToggleSubscriber(destination, openings, closingSelector) {
-        var _this = _super.call(this, destination) || this;
-        _this.openings = openings;
-        _this.closingSelector = closingSelector;
-        _this.contexts = [];
-        _this.add(_this.openSubscription = subscribeToResult(_this, openings, openings));
-        return _this;
+        _super.call(this, destination);
+        this.openings = openings;
+        this.closingSelector = closingSelector;
+        this.contexts = [];
+        this.add(this.openSubscription = subscribeToResult(this, openings, openings));
     }
     WindowToggleSubscriber.prototype._next = function (value) {
         var contexts = this.contexts;
@@ -19142,9 +19007,9 @@ var WindowToggleSubscriber = /** @class */ (function (_super) {
             var len = contexts.length;
             var index = -1;
             while (++index < len) {
-                var context_1 = contexts[index];
-                context_1.window.error(err);
-                context_1.subscription.unsubscribe();
+                var context = contexts[index];
+                context.window.error(err);
+                context.subscription.unsubscribe();
             }
         }
         _super.prototype._error.call(this, err);
@@ -19156,9 +19021,9 @@ var WindowToggleSubscriber = /** @class */ (function (_super) {
             var len = contexts.length;
             var index = -1;
             while (++index < len) {
-                var context_2 = contexts[index];
-                context_2.window.complete();
-                context_2.subscription.unsubscribe();
+                var context = contexts[index];
+                context.window.complete();
+                context.subscription.unsubscribe();
             }
         }
         _super.prototype._complete.call(this);
@@ -19170,9 +19035,9 @@ var WindowToggleSubscriber = /** @class */ (function (_super) {
             var len = contexts.length;
             var index = -1;
             while (++index < len) {
-                var context_3 = contexts[index];
-                context_3.window.unsubscribe();
-                context_3.subscription.unsubscribe();
+                var context = contexts[index];
+                context.window.unsubscribe();
+                context.subscription.unsubscribe();
             }
         }
     };
@@ -19186,14 +19051,14 @@ var WindowToggleSubscriber = /** @class */ (function (_super) {
             else {
                 var window_1 = new Subject();
                 var subscription = new Subscription();
-                var context_4 = { window: window_1, subscription: subscription };
-                this.contexts.push(context_4);
-                var innerSubscription = subscribeToResult(this, closingNotifier, context_4);
+                var context = { window: window_1, subscription: subscription };
+                this.contexts.push(context);
+                var innerSubscription = subscribeToResult(this, closingNotifier, context);
                 if (innerSubscription.closed) {
                     this.closeWindow(this.contexts.length - 1);
                 }
                 else {
-                    innerSubscription.context = context_4;
+                    innerSubscription.context = context;
                     subscription.add(innerSubscription);
                 }
                 this.destination.next(window_1);
@@ -19315,7 +19180,7 @@ function windowWhen$1(closingSelector) {
         return source.lift(new WindowOperator$1(closingSelector));
     };
 }
-var WindowOperator$1 = /** @class */ (function () {
+var WindowOperator$1 = (function () {
     function WindowOperator(closingSelector) {
         this.closingSelector = closingSelector;
     }
@@ -19329,14 +19194,13 @@ var WindowOperator$1 = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var WindowSubscriber$1 = /** @class */ (function (_super) {
+var WindowSubscriber$1 = (function (_super) {
     __extends(WindowSubscriber, _super);
     function WindowSubscriber(destination, closingSelector) {
-        var _this = _super.call(this, destination) || this;
-        _this.destination = destination;
-        _this.closingSelector = closingSelector;
-        _this.openWindow();
-        return _this;
+        _super.call(this, destination);
+        this.destination = destination;
+        this.closingSelector = closingSelector;
+        this.openWindow();
     }
     WindowSubscriber.prototype.notifyNext = function (outerValue, innerValue, outerIndex, innerIndex, innerSub) {
         this.openWindow(innerSub);
@@ -19476,7 +19340,7 @@ Observable.prototype.windowWhen = windowWhen$$1;
 function withLatestFrom$1() {
     var args = [];
     for (var _i = 0; _i < arguments.length; _i++) {
-        args[_i] = arguments[_i];
+        args[_i - 0] = arguments[_i];
     }
     return function (source) {
         var project;
@@ -19487,7 +19351,7 @@ function withLatestFrom$1() {
         return source.lift(new WithLatestFromOperator(observables, project));
     };
 }
-var WithLatestFromOperator = /** @class */ (function () {
+var WithLatestFromOperator = (function () {
     function WithLatestFromOperator(observables, project) {
         this.observables = observables;
         this.project = project;
@@ -19502,23 +19366,22 @@ var WithLatestFromOperator = /** @class */ (function () {
  * @ignore
  * @extends {Ignored}
  */
-var WithLatestFromSubscriber = /** @class */ (function (_super) {
+var WithLatestFromSubscriber = (function (_super) {
     __extends(WithLatestFromSubscriber, _super);
     function WithLatestFromSubscriber(destination, observables, project) {
-        var _this = _super.call(this, destination) || this;
-        _this.observables = observables;
-        _this.project = project;
-        _this.toRespond = [];
+        _super.call(this, destination);
+        this.observables = observables;
+        this.project = project;
+        this.toRespond = [];
         var len = observables.length;
-        _this.values = new Array(len);
+        this.values = new Array(len);
         for (var i = 0; i < len; i++) {
-            _this.toRespond.push(i);
+            this.toRespond.push(i);
         }
         for (var i = 0; i < len; i++) {
             var observable = observables[i];
-            _this.add(subscribeToResult(_this, observable, observable, i));
+            this.add(subscribeToResult(this, observable, observable, i));
         }
-        return _this;
     }
     WithLatestFromSubscriber.prototype.notifyNext = function (outerValue, innerValue, outerIndex, innerIndex, innerSub) {
         this.values[outerIndex] = innerValue;
@@ -19600,7 +19463,7 @@ var WithLatestFromSubscriber = /** @class */ (function (_super) {
 function withLatestFrom$$1() {
     var args = [];
     for (var _i = 0; _i < arguments.length; _i++) {
-        args[_i] = arguments[_i];
+        args[_i - 0] = arguments[_i];
     }
     return withLatestFrom$1.apply(void 0, args)(this);
 }
@@ -19617,7 +19480,7 @@ Observable.prototype.withLatestFrom = withLatestFrom$$1;
 function zipProto() {
     var observables = [];
     for (var _i = 0; _i < arguments.length; _i++) {
-        observables[_i] = arguments[_i];
+        observables[_i - 0] = arguments[_i];
     }
     return zip$1.apply(void 0, observables)(this);
 }
@@ -19640,7 +19503,7 @@ function zipAll$$1(project) {
 
 Observable.prototype.zipAll = zipAll$$1;
 
-var SubscriptionLog = /** @class */ (function () {
+var SubscriptionLog = (function () {
     function SubscriptionLog(subscribedFrame, unsubscribedFrame) {
         if (unsubscribedFrame === void 0) { unsubscribedFrame = Number.POSITIVE_INFINITY; }
         this.subscribedFrame = subscribedFrame;
@@ -19649,7 +19512,7 @@ var SubscriptionLog = /** @class */ (function () {
     return SubscriptionLog;
 }());
 
-var SubscriptionLoggable = /** @class */ (function () {
+var SubscriptionLoggable = (function () {
     function SubscriptionLoggable() {
         this.subscriptions = [];
     }
@@ -19681,10 +19544,10 @@ function applyMixins(derivedCtor, baseCtors) {
  * @ignore
  * @extends {Ignored}
  */
-var ColdObservable = /** @class */ (function (_super) {
+var ColdObservable = (function (_super) {
     __extends(ColdObservable, _super);
     function ColdObservable(messages, scheduler) {
-        var _this = _super.call(this, function (subscriber) {
+        _super.call(this, function (subscriber) {
             var observable = this;
             var index = observable.logSubscribedFrame();
             subscriber.add(new Subscription(function () {
@@ -19692,11 +19555,10 @@ var ColdObservable = /** @class */ (function (_super) {
             }));
             observable.scheduleMessages(subscriber);
             return subscriber;
-        }) || this;
-        _this.messages = messages;
-        _this.subscriptions = [];
-        _this.scheduler = scheduler;
-        return _this;
+        });
+        this.messages = messages;
+        this.subscriptions = [];
+        this.scheduler = scheduler;
     }
     ColdObservable.prototype.scheduleMessages = function (subscriber) {
         var messagesLength = this.messages.length;
@@ -19717,14 +19579,13 @@ applyMixins(ColdObservable, [SubscriptionLoggable]);
  * @ignore
  * @extends {Ignored}
  */
-var HotObservable = /** @class */ (function (_super) {
+var HotObservable = (function (_super) {
     __extends(HotObservable, _super);
     function HotObservable(messages, scheduler) {
-        var _this = _super.call(this) || this;
-        _this.messages = messages;
-        _this.subscriptions = [];
-        _this.scheduler = scheduler;
-        return _this;
+        _super.call(this);
+        this.messages = messages;
+        this.subscriptions = [];
+        this.scheduler = scheduler;
     }
     HotObservable.prototype._subscribe = function (subscriber) {
         var subject = this;
@@ -19750,16 +19611,16 @@ var HotObservable = /** @class */ (function (_super) {
 }(Subject));
 applyMixins(HotObservable, [SubscriptionLoggable]);
 
-var VirtualTimeScheduler = /** @class */ (function (_super) {
+var VirtualTimeScheduler = (function (_super) {
     __extends(VirtualTimeScheduler, _super);
     function VirtualTimeScheduler(SchedulerAction, maxFrames) {
+        var _this = this;
         if (SchedulerAction === void 0) { SchedulerAction = VirtualAction; }
         if (maxFrames === void 0) { maxFrames = Number.POSITIVE_INFINITY; }
-        var _this = _super.call(this, SchedulerAction, function () { return _this.frame; }) || this;
-        _this.maxFrames = maxFrames;
-        _this.frame = 0;
-        _this.index = -1;
-        return _this;
+        _super.call(this, SchedulerAction, function () { return _this.frame; });
+        this.maxFrames = maxFrames;
+        this.frame = 0;
+        this.index = -1;
     }
     /**
      * Prompt the Scheduler to execute all of its queued actions, therefore
@@ -19789,17 +19650,16 @@ var VirtualTimeScheduler = /** @class */ (function (_super) {
  * @ignore
  * @extends {Ignored}
  */
-var VirtualAction = /** @class */ (function (_super) {
+var VirtualAction = (function (_super) {
     __extends(VirtualAction, _super);
     function VirtualAction(scheduler, work, index) {
         if (index === void 0) { index = scheduler.index += 1; }
-        var _this = _super.call(this, scheduler, work) || this;
-        _this.scheduler = scheduler;
-        _this.work = work;
-        _this.index = index;
-        _this.active = true;
-        _this.index = scheduler.index = index;
-        return _this;
+        _super.call(this, scheduler, work);
+        this.scheduler = scheduler;
+        this.work = work;
+        this.index = index;
+        this.active = true;
+        this.index = scheduler.index = index;
     }
     VirtualAction.prototype.schedule = function (state, delay) {
         if (delay === void 0) { delay = 0; }
@@ -19855,15 +19715,14 @@ var VirtualAction = /** @class */ (function (_super) {
 }(AsyncAction));
 
 var defaultMaxFrame = 750;
-var TestScheduler = /** @class */ (function (_super) {
+var TestScheduler = (function (_super) {
     __extends(TestScheduler, _super);
     function TestScheduler(assertDeepEqual) {
-        var _this = _super.call(this, VirtualAction, defaultMaxFrame) || this;
-        _this.assertDeepEqual = assertDeepEqual;
-        _this.hotObservables = [];
-        _this.coldObservables = [];
-        _this.flushTests = [];
-        return _this;
+        _super.call(this, VirtualAction, defaultMaxFrame);
+        this.assertDeepEqual = assertDeepEqual;
+        this.hotObservables = [];
+        this.coldObservables = [];
+        this.flushTests = [];
     }
     TestScheduler.prototype.createTime = function (marbles) {
         var indexOf = marbles.indexOf('|');
@@ -19959,8 +19818,8 @@ var TestScheduler = /** @class */ (function (_super) {
         _super.prototype.flush.call(this);
         var readyFlushTests = this.flushTests.filter(function (test) { return test.ready; });
         while (readyFlushTests.length > 0) {
-            var test_1 = readyFlushTests.shift();
-            this.assertDeepEqual(test_1.actual, test_1.expected);
+            var test = readyFlushTests.shift();
+            this.assertDeepEqual(test.actual, test.expected);
         }
     };
     TestScheduler.parseMarblesAsSubscriptions = function (marbles) {
@@ -20065,7 +19924,7 @@ var TestScheduler = /** @class */ (function (_super) {
     return TestScheduler;
 }(VirtualTimeScheduler));
 
-var RequestAnimationFrameDefinition = /** @class */ (function () {
+var RequestAnimationFrameDefinition = (function () {
     function RequestAnimationFrameDefinition(root$$1) {
         if (root$$1.requestAnimationFrame) {
             this.cancelAnimationFrame = root$$1.cancelAnimationFrame.bind(root$$1);
@@ -20101,13 +19960,12 @@ var AnimationFrame = new RequestAnimationFrameDefinition(_root);
  * @ignore
  * @extends {Ignored}
  */
-var AnimationFrameAction = /** @class */ (function (_super) {
+var AnimationFrameAction = (function (_super) {
     __extends(AnimationFrameAction, _super);
     function AnimationFrameAction(scheduler, work) {
-        var _this = _super.call(this, scheduler, work) || this;
-        _this.scheduler = scheduler;
-        _this.work = work;
-        return _this;
+        _super.call(this, scheduler, work);
+        this.scheduler = scheduler;
+        this.work = work;
     }
     AnimationFrameAction.prototype.requestAsyncId = function (scheduler, id, delay) {
         if (delay === void 0) { delay = 0; }
@@ -20143,10 +20001,10 @@ var AnimationFrameAction = /** @class */ (function (_super) {
     return AnimationFrameAction;
 }(AsyncAction));
 
-var AnimationFrameScheduler = /** @class */ (function (_super) {
+var AnimationFrameScheduler = (function (_super) {
     __extends(AnimationFrameScheduler, _super);
     function AnimationFrameScheduler() {
-        return _super !== null && _super.apply(this, arguments) || this;
+        _super.apply(this, arguments);
     }
     AnimationFrameScheduler.prototype.flush = function (action) {
         this.active = true;
@@ -20314,10 +20172,6 @@ var _operators = Object.freeze({
 // Subject imported before Observable to bypass circular dependency issue since
 // Subject extends Observable and Observable references Subject in it's
 // definition
-// statics
-/* tslint:disable:no-use-before-declare */
-//dom
-//operators
 var operators = _operators;
 /* tslint:enable:no-unused-variable */
 /**
