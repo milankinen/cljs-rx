@@ -303,11 +303,17 @@
 
 (defn group-by
   ([obs key-selector result-selector duration-selector]
-   (.groupBy obs (fn-1 key-selector) (fn-2 result-selector) (fn-1 duration-selector)))
+   (-> obs
+       (.groupBy (fn-1 key-selector) (fn-2 result-selector) (fn-1 duration-selector))
+       (.map (fn [obs] [(.-key obs) obs]))))
   ([obs key-selector result-selector]
-   (.groupBy obs (fn-1 key-selector) (fn-2 result-selector)))
+   (-> obs
+       (.groupBy (fn-1 key-selector) (fn-2 result-selector))
+       (.map (fn [obs] [(.-key obs) obs]))))
   ([obs key-selector]
-   (.groupBy obs (fn-1 key-selector))))
+   (-> obs
+       (.groupBy (fn-1 key-selector))
+       (.map (fn [obs] [(.-key obs) obs])))))
 
 (defn ignore-elements [obs]
   (.ignoreElements obs))
